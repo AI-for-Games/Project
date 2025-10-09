@@ -13,8 +13,33 @@ public class CreateSlider : MonoBehaviour
     private Slider m_avoidance_slider;
     private Text m_avoidance_slider_text;
 
+    public void SetSlidersActive(bool active)
+    {
+        if (m_cohesion_slider != null) m_cohesion_slider.gameObject.SetActive(active);
+        if (m_cohesion_slider_text != null) m_cohesion_slider_text.gameObject.SetActive(active);
+
+        if (m_alignment_slider != null) m_alignment_slider.gameObject.SetActive(active);
+        if (m_alignment_slider_text != null) m_alignment_slider_text.gameObject.SetActive(active);
+
+        if (m_avoidance_slider != null) m_avoidance_slider.gameObject.SetActive(active);
+        if (m_avoidance_slider_text != null) m_avoidance_slider_text.gameObject.SetActive(active);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.H)) // H for hide
+        {
+            SetSlidersActive(false);
+        }
+        if (Input.GetKeyDown(KeyCode.S)) // S for show
+        {
+            SetSlidersActive(true);
+        }
+    }
+
     void Start()
     {
+
         // Ensure EventSystem exists
         if (FindObjectOfType<EventSystem>() == null)
         {
@@ -48,6 +73,8 @@ public class CreateSlider : MonoBehaviour
         m_cohesion_slider.onValueChanged.AddListener((v) => m_cohesion_slider_text.text = $"Cohesion: {v:F0}");
         m_alignment_slider.onValueChanged.AddListener((v) => m_alignment_slider_text.text = $"Alignment: {v:F0}");
         m_avoidance_slider.onValueChanged.AddListener((v) => m_avoidance_slider_text.text = $"Avoidance: {v:F0}");
+
+        SetSlidersActive(false);
     }
 
     private void CreateSliderUI(Transform parent, string name, Vector2 anchoredPos, out Text text_ui, out Slider slider_ui)
