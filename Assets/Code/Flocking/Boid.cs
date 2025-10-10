@@ -5,8 +5,9 @@ using UnityEngine;
 public class Boid : MonoBehaviour
 {
     public Vector3 m_position = Vector3.zero;
-    public Vector3 m_velocity = Vector3.zero;
-
+    public Vector3 m_velocity = Vector3.one;
+    public float m_neighbor_search_radius = 1000.0f;
+    public int m_max_number_of_neighbors = 1000;
 
     private GameObject m_game_object;
     private Vector3 m_scale = Vector3.one * 0.7f;
