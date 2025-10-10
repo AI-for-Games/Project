@@ -4,13 +4,13 @@ using UnityEngine.EventSystems;
 
 public class CreateSlider : MonoBehaviour
 {
-    private Slider m_cohesion_slider;
+    public Slider m_cohesion_slider;
     private Text m_cohesion_slider_text;
 
-    private Slider m_alignment_slider;
+    public Slider m_alignment_slider;
     private Text m_alignment_slider_text;
 
-    private Slider m_avoidance_slider;
+    public Slider m_avoidance_slider;
     private Text m_avoidance_slider_text;
 
     public void SetSlidersActive(bool active)
