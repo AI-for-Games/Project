@@ -54,45 +54,130 @@ public class QuickSort<T>
     }
 }
 
-public class KD_Tree_Node
+public class KD_Tree_Node<T> where T : MonoBehaviour
 {
-    public GameObject m_Data;
+    public T m_Data;
     public KD_Tree_Node m_Left;
     public KD_Tree_Node m_Right;
 
-    public KD_Tree_Node(List<GameObject> Objects, int Axis = 0)
+
+    void GetNearestNeighbors(Vector3 Target, float SearchRadiusSqrd, int MaxNeighbors, ref List<T, float> Neighbors, int Axis = 0)
     {
-        switch (Axis)
+        float DistanceSqrd = (Target - m_Data.transform.position).sqrMagnitude;
+
+        if(DistanceSqrd <= SearchRadiusSqrd)
         {
-            case 0:
-                break;
-        };
+            Neighbors.Add({m_Data, DistanceSqrd});
+            QuickSort<T, float> QS = new QuickSort<T, float>();
+            QS.Sort(Neighbors, (a, b)=>a.second <= b.second));
+       
+            if (Neighbors.Count == MaxNeighbors)
+            Neighbors.RemoveAt(Neighbors.Count - 1);
+        }
+
+        KD_Tree_Node Priority = null;
+        KD_Tree_Node SecondPriority = null;
+
+        if (Target[Axis] <= m_Data.transform.position[Axis])
+        {
+            Priority = m_Left;
+            SecondPriority = m_Right;
+        }
+        else
+        {
+            Priority = m_Right;
+            SecondPriority = m_Left;
+        }
+
+        if(Priority != null)
+            Priority.GetNearestNeighbors(Target, SearchRadiusSqrd, MaxNeighbors, ref Neighbors);
+
+        if (Neighbors.Count < MaxNeighbors && SecondPriority != null)
+            SecondPriority.GetNearestNeighbors(Target, SearchRadiusSqrd, MaxNeighbors, ref Neighbors);
     }
 }
 
-public class KD_Tree : MonoBehaviour
+public class KD_Tree<T> : MonoBehaviour where T : MonoBehaviour
 {
     private int m_TickModulus = 0;
     private const int m_UpdateEveryNTicks = 5;
 
     private KD_Tree_Node m_Root;
 
+    private void InsertNode(T Object)
+    {
+        if (m_CompareDelegateArray == null)
+        {
+            return;
+        }
+
+        if(m_Root == null)
+        {
+            m_Root = new KD_Tree_Node<T>();
+            m_Root.m_Data = Object;
+            return;
+        }
+
+        KD_Tree_Node<T> CurrentNode = m_Root;
+        int Axis = 0;
+
+        while(true)
+        {
+            //go left
+            if (Object.transform.position[Axis] <= CurrentNode.m_Data.transform.position[Axis])
+            {
+                if (CurrentNode.m_Left == null)
+                {
+                    CurrentNode.m_Left = new KD_Tree_Node<T>();
+                    CurrentNode.m_Left.m_Data = Object;
+                    break;
+                }
+                else
+                {
+                    CurrentNode = CurrentNode.m_Left;
+                    Axis++;
+                    Axis %= 3;
+                }
+            }
+            //go right
+            else
+            {
+                if (CurrentNode.m_Right == null)
+                {
+                    CurrentNode.m_Right = new KD_Tree_Node<T>();
+                    CurrentNode.m_Right.m_Data = Object;
+                    break;
+                }
+                else
+                {
+                    CurrentNode = CurrentNode.m_Right;
+                    Axis++;
+                    Axis %= 3;
+                }
+            }
+        }
+    }
+
+    private void CreateKDTree(ref List<T> Objects)
+    {
+        for(int i = 0; i < Objects.Count; i++)
+        {
+            T Obj = Objects[i];
+            InsertNode(Obj);
+        }
+    };
+
     void Update()
     {
         if(m_TickModulus == 0)
         {
             if(m_Root != null)
-                Destroy(m_Root);
+                m_Root = null;
 
-            m_Root = new KD_Tree_Node();
+            CreateKDTree(FindObjectsOfType<T>());
         }
 
         m_TickModulus++;
         m_TickModulus %= m_UpdateEveryNTicks;
-    }
-
-    List<GameObject> GetNearestNeighbors(Vector3 Target)
-    {
-        //todo
     }
 }
