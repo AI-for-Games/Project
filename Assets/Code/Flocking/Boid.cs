@@ -9,8 +9,8 @@ public class Boid : MonoBehaviour
     public Vector3 m_velocity = Vector3.one;
 
     //Neighboring boids queerying data
-    public float m_neighbor_search_radius = 1000.0f;
-    public int m_max_number_of_neighbors = 1000;
+    public float m_neighbor_search_radius = 5.0f;
+    public int m_max_number_of_neighbors = 5;
 
     //visual representation 
     private GameObject m_game_object;

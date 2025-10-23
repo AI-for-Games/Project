@@ -164,10 +164,10 @@ public class FlockingController : MonoBehaviour
             RandomVec3.z = 0.0f;
             Resultant += RandomVec3 * 0.5f;
 
-            //little rule to keep boids draw to centre of scene
-            //Resultant += (Vector3.zero - m_boids[i].GetComponent<Boid>().m_position) * 0.4f;
 
             //test code
+            //little rule to keep boids draw to centre of scene
+            //Resultant += (Vector3.zero - m_boids[i].GetComponent<Boid>().m_position) * 0.4f;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
@@ -180,7 +180,11 @@ public class FlockingController : MonoBehaviour
             //test code
 
             //set boid velocity
-            m_boids[i].GetComponent<Boid>().m_velocity = Resultant * (Random.Range(1, 5));
+            Boid LocalBoid = m_boids[i].GetComponent<Boid>();
+
+            //LocalBoid.m_velocity = Resultant * (Random.Range(1, 5));
+            float interpSpeed = 8.0f;
+            LocalBoid.m_velocity += (Resultant - LocalBoid.m_velocity) * (1 - Mathf.Exp(-interpSpeed * Time.deltaTime));
         }
     }
 
