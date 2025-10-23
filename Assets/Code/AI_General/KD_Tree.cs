@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class QuickSort
+public class QuickSort<T>
 {
-    public void Sort(ref List<GameObject> RefList, Comparison<GameObject> Compare)
+    public void Sort(ref List<T> RefList, Comparison<T> Compare)
     {
         if (RefList == null || RefList.Count == 0)
             return;
@@ -12,7 +12,7 @@ public class QuickSort
         SortMethod(ref RefList, 0, RefList.Count-1, Compare);
     }
 
-    private void SortMethod(ref List<GameObject> RefList, int Left, int Right, Comparison<GameObject> Compare)
+    private void SortMethod(ref List<T> RefList, int Left, int Right, Comparison<T> Compare)
     {
         if (Left >= Right)
             return;
@@ -23,14 +23,14 @@ public class QuickSort
         SortMethod(ref RefList, Mid+1, Right, Compare);
     }
 
-    private void Swap(ref List<GameObject> RefList, int i, int j)
+    private void Swap(ref List<T> RefList, int i, int j)
     {
-        GameObject temp = RefList[i];
+        T temp = RefList[i];
         RefList[i] = RefList[j];
         RefList[j] = temp;
     }
 
-    private int Partition(ref List<GameObject> RefList, int Left, int Right, Comparison<GameObject> Compare)
+    private int Partition(ref List<T> RefList, int Left, int Right, Comparison<T> Compare)
     {
         int i = Left-1;
         int Pivot = (Left + Right)/2;
@@ -62,7 +62,11 @@ public class KD_Tree_Node
 
     public KD_Tree_Node(List<GameObject> Objects, int Axis = 0)
     {
-
+        switch (Axis)
+        {
+            case 0:
+                break;
+        };
     }
 }
 
