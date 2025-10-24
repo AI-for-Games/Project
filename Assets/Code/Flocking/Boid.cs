@@ -2,15 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Boid : MonoBehaviour
+public class Boid : AIBase
 {
-    //We define our own position and velocity for more control
-    public Vector3 m_position = Vector3.zero;
-    public Vector3 m_velocity = Vector3.one;
-
     //Neighboring boids queerying data
-    public float m_neighbor_search_radius = 5.0f;
-    public int m_max_number_of_neighbors = 5;
+    public float m_neighbor_search_radius = 8.0f;
+    public int m_max_number_of_neighbors = 16;
 
     //visual representation 
     private GameObject m_game_object;
@@ -24,14 +20,11 @@ public class Boid : MonoBehaviour
 
     void Update()
     {
-        //update position using velocity relative to dt, and have this reflect in the owner 
-        m_position += m_velocity * Time.deltaTime;
-        transform.position = m_position;
-
+        base.Update();
         //do the same for the visual representation -> see comment above 
         if (m_game_object != null)
         {
-            m_game_object.transform.position = m_position; ;
+            m_game_object.transform.position = m_position;
             m_game_object.transform.localScale = m_scale;
             m_game_object.transform.SetParent(transform);
         }

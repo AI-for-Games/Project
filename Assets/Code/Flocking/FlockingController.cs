@@ -9,7 +9,7 @@ public class FlockingController : MonoBehaviour
     public int NumberOfBoids = 1000;
 
     //array of  boids
-    private GameObject[] m_boids;
+    private List<AIBase> m_boids;
 
     //flocking rule weights, retrieved from custom ui sliders
     private float m_AlignmentWeight = 0;
@@ -24,56 +24,47 @@ public class FlockingController : MonoBehaviour
             return;
 
         //create the boid array
-        m_boids = new GameObject[NumberOfBoids];
+        m_boids = new List<AIBase>();
 
         //create, configure and assign boid to boid array
-        for (int i = 0; i < m_boids.Length; i++)
+        for (int i = 0; i < NumberOfBoids; i++)
         {
-            m_boids[i] = new GameObject("Boid_" + i);
-            Boid boid = m_boids[i].AddComponent<Boid>();
-            boid.m_position = NavVolume.GetRandomPointWithinVolume();
+            GameObject BoidObject = new GameObject("Boid_" + i);
+            Boid LocalBoid = BoidObject.AddComponent<Boid>();
+
+            m_boids.Add(LocalBoid);
+
+            LocalBoid.m_position = NavVolume.GetRandomPointWithinVolume();
         }
     }
 
     /*
      * This can be substituted for spacial partitioning later on
      */
-    List<int> GetNeighborsOfBoid(int Index)
+    GameObject tree = null;
+    List<Neighbor> GetNeighborsOfBoid(int Index)
     {
-        //define empty list for neighbors
-        List<int> Neighbors = new List<int>();
-
-        //grab local boid
-        Boid LocalBoid = m_boids[Index].GetComponent<Boid>();
-
-        //loop over all boids
-        for (int I = 0; I < m_boids.Length; I++)
+        if (tree == null)
         {
-            //check current boid is not the local boid
-            if (I == Index) continue;
-
-            //grab neighbor boid position
-            Vector3 PossibleNeighborPossition = m_boids[I].GetComponent<Boid>().m_position;
-
-            //define radius sqrd of local boid search radius
-            float SearchRadiusSqrd = LocalBoid.m_neighbor_search_radius * LocalBoid.m_neighbor_search_radius;
-
-            //check if distance between two boids are within range
-            if ((PossibleNeighborPossition - LocalBoid.m_position).sqrMagnitude < SearchRadiusSqrd)
-            {
-                //add neighbor to neighbor array
-                Neighbors.Add(I);
-                
-                //check if max neighbor count is reached
-                if (Neighbors.Count >= LocalBoid.m_max_number_of_neighbors)
-                    break;
-            }
+            tree = new GameObject("KD_Tree");
+            tree.AddComponent<KD_Tree>();
+            tree.GetComponent<KD_Tree>().CreateKDTree(m_boids);
         }
+
+        Boid LocalBoid = (Boid)m_boids[Index];
+        List<Neighbor> Neighbors = new List<Neighbor>();
+        tree.GetComponent<KD_Tree>().m_Root.GetNearestNeighbors(LocalBoid.m_position, LocalBoid.m_neighbor_search_radius * LocalBoid.m_neighbor_search_radius, LocalBoid.m_max_number_of_neighbors, ref Neighbors);
+
+        QuickSort<Neighbor> QS = new QuickSort<Neighbor>();
+        QS.Sort(ref Neighbors, (a, b) => a.m_Distance.CompareTo(b.m_Distance));
+
+        while (Neighbors.Count > LocalBoid.m_max_number_of_neighbors)
+            Neighbors.RemoveAt(Neighbors.Count - 1);
 
         return Neighbors;
     }
 
-    Vector3 GetAlignmentContribution(int Index, List<int> Neighbors)
+    Vector3 GetAlignmentContribution(int Index, List<Neighbor> Neighbors)
     {
         //check for empty neighbors
         if (Neighbors.Count == 0) return Vector3.zero;
@@ -84,14 +75,14 @@ public class FlockingController : MonoBehaviour
         //loop over neighbors and sum the velocities
         for (int I = 0; I < Neighbors.Count; I++)
         {
-            Boid neighbor_boid = m_boids[Neighbors[I]].GetComponent<Boid>();
+            AIBase neighbor_boid = Neighbors[I].m_Data;
             Resultant += neighbor_boid.m_velocity;
         }
         //return the average velocity normaized into the alignment weight
         return (Resultant / Neighbors.Count).normalized * m_AlignmentWeight;
     }
 
-    Vector3 GetAveragePositionOfNeighboringBoids(List<int> Neighbors)
+    Vector3 GetAveragePositionOfNeighboringBoids(List<Neighbor> Neighbors)
     {
         //define empty resultant
         Vector3 Resultant = Vector3.zero;
@@ -99,12 +90,12 @@ public class FlockingController : MonoBehaviour
         //loop over all neighbors and add position to resultant
         for (int i = 0; i < Neighbors.Count; i++)
         {
-            Resultant += m_boids[Neighbors[i]].GetComponent<Boid>().m_position;
+            Resultant += Neighbors[i].m_Data.m_position;
         }
         return Resultant / Neighbors.Count;
     }
 
-    Vector3 GetAvoidanceContribution(int Index, List<int> Neighbors)
+    Vector3 GetAvoidanceContribution(int Index, List<Neighbor> Neighbors)
     {
         //check for empty neighbors
         if (Neighbors.Count == 0) return Vector3.zero;
@@ -119,7 +110,7 @@ public class FlockingController : MonoBehaviour
         return -(ToNeighboringBoids - LocalBoidPosition).normalized * m_AvoidanceWeight;
     }
 
-    Vector3 GetCohesionContribution(int Index, List<int> Neighbors)
+    Vector3 GetCohesionContribution(int Index, List<Neighbor> Neighbors)
     {
         //check for empty neighbors
         if (Neighbors.Count == 0) return Vector3.zero;
@@ -147,10 +138,10 @@ public class FlockingController : MonoBehaviour
         m_AvoidanceWeight = (float)System.Math.Round((float)slider.m_avoidance_slider.value / 100.0f, 2);
 
         //for each boid
-        for (int i = 0; i < m_boids.Length; i++)
+        for (int i = 0; i < m_boids.Count; i++)
         {
             //grab all neighbors
-            List<int> Neighbors = GetNeighborsOfBoid(i);
+            List<Neighbor> Neighbors = GetNeighborsOfBoid(i);
 
             //compute final resultant
             Vector3 Resultant = Vector3.zero;
@@ -162,7 +153,7 @@ public class FlockingController : MonoBehaviour
             Vector3 RandomVec3 = new Vector3(Random.Range(0, 10), Random.Range(0, 10), Random.Range(0, 10)).normalized;
             RandomVec3.y = 0.0f;
             RandomVec3.z = 0.0f;
-            Resultant += RandomVec3 * 0.5f;
+            Resultant += RandomVec3 * 0.2f;
 
 
             //test code
