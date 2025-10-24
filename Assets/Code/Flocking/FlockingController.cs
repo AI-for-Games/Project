@@ -62,38 +62,6 @@ public class FlockingController : MonoBehaviour
             Neighbors.RemoveAt(Neighbors.Count - 1);
 
         return Neighbors;
-
-        ////define empty list for neighbors
-        //List<int> Neighbors = new List<int>();
-
-        ////grab local boid
-        //Boid LocalBoid = m_boids[Index].GetComponent<Boid>();
-
-        ////loop over all boids
-        //for (int I = 0; I < m_boids.Length; I++)
-        //{
-        //    //check current boid is not the local boid
-        //    if (I == Index) continue;
-
-        //    //grab neighbor boid position
-        //    Vector3 PossibleNeighborPossition = m_boids[I].GetComponent<Boid>().m_position;
-
-        //    //define radius sqrd of local boid search radius
-        //    float SearchRadiusSqrd = LocalBoid.m_neighbor_search_radius * LocalBoid.m_neighbor_search_radius;
-
-        //    //check if distance between two boids are within range
-        //    if ((PossibleNeighborPossition - LocalBoid.m_position).sqrMagnitude < SearchRadiusSqrd)
-        //    {
-        //        //add neighbor to neighbor array
-        //        Neighbors.Add(I);
-
-        //        //check if max neighbor count is reached
-        //        if (Neighbors.Count >= LocalBoid.m_max_number_of_neighbors)
-        //            break;
-        //    }
-        //}
-
-        //return Neighbors;
     }
 
     Vector3 GetAlignmentContribution(int Index, List<Neighbor> Neighbors)
