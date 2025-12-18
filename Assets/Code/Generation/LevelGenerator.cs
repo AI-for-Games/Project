@@ -6,7 +6,7 @@ public class LevelGenerator : MonoBehaviour
 {
     // [Header("Level Size")]
     public int width = 30;
-    public int height = 5;
+    public int height = 1;
     public int depth = 30;
 
     // [Header("Rooms"]]
@@ -17,7 +17,6 @@ public class LevelGenerator : MonoBehaviour
     // [Header("Prefabs")]
     public GameObject floorPrefab;
     public GameObject wallPrefab;
-    public GameObject ceilingPrefab;
 
     private int[,,] map;
     private List<Room> rooms = new List<Room>();
@@ -27,7 +26,6 @@ public class LevelGenerator : MonoBehaviour
         GenerateMap();
         BuildMap();
         Debug.Log("Rooms created: " + rooms.Count);
-
     }
 
     void GenerateMap()
@@ -48,7 +46,6 @@ public class LevelGenerator : MonoBehaviour
             attempts++;
         }
 
-
         ConnectRooms();  // Connect rooms
     }
 
@@ -61,13 +58,8 @@ public class LevelGenerator : MonoBehaviour
         int z = Random.Range(1, depth - roomDepth - 1);
 
         BoundsInt newRoom = new BoundsInt(
-            x,
-            1,
-            z,
-            roomWidth,
-            height - 2,
-            roomDepth
-        );
+            x, 0, z,
+            roomWidth, 1, roomDepth);
 
         foreach (Room room in rooms)
         {
@@ -124,23 +116,21 @@ public class LevelGenerator : MonoBehaviour
     {
         for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int z = 0; z < depth; z++)
             {
-                for (int z = 0; z < depth; z++)
+                Vector3 floorPos = new Vector3(x, 0, z);
+
+                if (map[x, 0, z] == 0)
                 {
-                    Vector3 pos = new Vector3(x, y, z);
-
-                    if (map[x, y, z] == 1)
+                    Instantiate(floorPrefab, floorPos, Quaternion.identity, transform);
+                }
+                else
+                {
+                    // Build a vertical wall for visibility
+                    for (int y = 0; y < 3; y++)
                     {
-                        Instantiate(wallPrefab, pos, Quaternion.identity, transform);
-                    }
-                    else
-                    {
-                        if (y == 1)  // Floor
-                            Instantiate(floorPrefab, pos, Quaternion.identity, transform);
-
-                        if (y == height - 2)  // Ceiling
-                            Instantiate(ceilingPrefab, pos, Quaternion.identity, transform);
+                        Vector3 wallPos = new Vector3(x, y, z);
+                        Instantiate(wallPrefab, wallPos, Quaternion.identity, transform);
                     }
                 }
             }

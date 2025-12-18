@@ -354,14 +354,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   width: 35
-  height: 2
+  height: 1
   depth: 35
-  roomCount: 2
+  roomCount: 6
   roomSizeMin: {x: 3, y: 3}
-  roomSizeMax: {x: 8, y: 8}
+  roomSizeMax: {x: 9, y: 9}
   floorPrefab: {fileID: 8149556984862051525, guid: f3dadf6398c95744e80474abf6391e48, type: 3}
   wallPrefab: {fileID: 4313989970519390638, guid: 877bc47562f97ce4eb5f1448cd6596dc, type: 3}
-  ceilingPrefab: {fileID: 3153007640398436097, guid: 6f32528b254e09c42b76f2e1da115b92, type: 3}
 --- !u!4 &1284758421
 Transform:
   m_ObjectHideFlags: 0
