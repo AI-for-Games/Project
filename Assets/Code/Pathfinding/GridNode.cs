@@ -1,16 +1,25 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class GridNode
 {
     public bool walkable;
-    public Vector2 position;
+    public Vector3 worldPosition;
+    public int gridX;  
+    public int gridY;
+    public int gCost;
+    public int hCost;
+    public GridNode Parent;
+    public int fCost => gCost + hCost;
 
-    public GridNode(bool _walkable, Vector2 _position)
+    public GridNode(bool walkable, Vector3 worldPosition, int gridX, int gridY)
     {
-        walkable = _walkable;
-        position = _position;
+        this.walkable = walkable;
+        this.worldPosition = worldPosition;
+        this.gridX = gridX;
+        this.gridY = gridY;
     }
 }
