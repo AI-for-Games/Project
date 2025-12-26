@@ -13,8 +13,7 @@ public class Pathfinding : MonoBehaviour
     {
         grid = GetComponent<NavGrid>();
     }
-
-
+    
     public List<GridNode> FindPath(Vector3 startPos, Vector3 targetPos)
     {
         GridNode startNode = grid.NodeFromWorldPoint(startPos);
