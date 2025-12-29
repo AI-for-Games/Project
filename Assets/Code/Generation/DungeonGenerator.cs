@@ -63,7 +63,7 @@ public class DungeonGenerator : MonoBehaviour
             int roomW = Random.Range(6, 10);
             int roomH = Random.Range(6, 10);
             int x = Random.Range(1, width - roomW - 1);
-            int y = Random.Range(1, width - roomH - 1);
+            int y = Random.Range(1, height - roomH - 1);
 
             for (int rx = x; rx < x + roomW; rx++)
             {
@@ -141,26 +141,34 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    void SpawnXWall(int startX, int endX, int y)
+    void SpawnSouthWalls()
     {
-        int length = endX - startX + 1;
-        int wallCount = length / 3;
-
-        for (int i = 0; i < wallCount; i++)
+        for (int y = 0; y < height; y++)
         {
-            int x = startX + i * 3 + 1; // center of 3 tiles
+            int runStart = -1;
 
-            Vector3 pos = new Vector3(
-                x * tileSize,
-                0,
-                (y * tileSize) + wallThicknessOffset
-            );
+            for (int x = 0; x <= width; x++)
+            {
+                bool hasWall =
+                    (x < width) &&
+                    (y > 0) &&
+                    yWalls[x, y - 1];
 
-            Instantiate(GetRandWall(), pos, RotNorth, transform);
+                if (hasWall && runStart == -1)
+                {
+                    runStart = x;
+                }
+                else if (!hasWall && runStart != -1)
+                {
+                    SpawnSouthWall(runStart, x - 1, y);
+                    runStart = -1;
+                }
+            }
         }
     }
 
-    void SpawnYWall(int x, int startY, int endY)
+
+    void SpawnXWall(int x, int startY, int endY)
     {
         int length = endY - startY + 1;
         int wallCount = length / 3;
@@ -170,14 +178,53 @@ public class DungeonGenerator : MonoBehaviour
             int y = startY + i * 3 + 1;
 
             Vector3 pos = new Vector3(
-                (x * tileSize) - wallThicknessOffset,
+                (x * tileSize) + wallThicknessOffset,
                 0,
-                y * tileSize
+                (y + 1) * tileSize
             );
 
             Instantiate(GetRandWall(), pos, RotEast, transform);
         }
     }
+
+    void SpawnYWall(int startX, int endX, int y)
+    {
+        int length = endX - startX + 1;
+        int wallCount = length / 3;
+
+        for (int i = 0; i < wallCount; i++)
+        {
+            int x = startX + i * 3 + 1;
+
+            Vector3 pos = new Vector3(
+                (x + 1) * tileSize,
+                0,
+                (y * tileSize) + wallThicknessOffset
+            );
+
+            Instantiate(GetRandWall(), pos, RotNorth, transform);
+        }
+    }
+
+    void SpawnSouthWall(int startX, int endX, int y)
+    {
+        int length = endX - startX + 1;
+        int wallCount = length / 3;
+
+        for (int i = 0; i < wallCount; i++)
+        {
+            int centerX = startX + i * 3 + 1;
+
+            Vector3 pos = new Vector3(
+                centerX * tileSize,
+                0,
+                y * tileSize
+            );
+
+            Instantiate(GetRandWall(), pos, RotSouth, transform);
+        }
+    }
+
 
     void SpawnFloors()
     {
