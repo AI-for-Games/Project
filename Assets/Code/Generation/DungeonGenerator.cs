@@ -1,270 +1,176 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum CellType
-{
-    Empty,
-    Floor,
-    Wall
-}
-
 public class DungeonGenerator : MonoBehaviour
 {
-    public GameObject floorPrefab;
+    public int width = 20;
+    public int height = 20;
+    public float cellSize = 20f;
 
-    public GameObject[] wallPreFabs;
+    public List<PrefabData> rooms;
+    public List<PrefabData> corridors;
 
-    public int width = 50;
-    public int height = 50;
-
-    public float tileSize = 1f;
-    public float wallHalfLength = 1.5f;
-    public float wallThicknessOffset = 0.5f;
-
-    private CellType[,] grid;
-    private bool[,] xWalls;
-    private bool[,] yWalls;
-
-    private Quaternion RotNorth = Quaternion.Euler(0, 0, 0);
-    private Quaternion RotEast = Quaternion.Euler(0, 90, 0);
-    private Quaternion RotSouth = Quaternion.Euler(0, 180, 0);
-    private Quaternion RotWest = Quaternion.Euler(0, 270, 0);
-
-    private Vector3 OffsetNorth = new Vector3(0, 0, 0);
-    private Vector3 OffsetSouth = new Vector3(0, 0, 0);
-    private Vector3 OffsetEast = new Vector3(0, 0, 0);
-    private Vector3 OffsetWest = new Vector3(0, 0, 0);
+    private PrefabData[,] grid;
 
     void Start()
     {
-        OffsetNorth = new Vector3(0, 0, wallThicknessOffset);
-        OffsetSouth = new Vector3(0, 0, -wallThicknessOffset);
-        OffsetEast = new Vector3(wallThicknessOffset, 0, 0);
-        OffsetWest = new Vector3(-wallThicknessOffset, 0, 0);
-
         Generate();
-
-        SpawnFloors();
-
-        BuildWallMaps();
-        SpawnXWalls();
-        SpawnYWalls();
     }
 
     void Generate()
     {
-        grid = new CellType[width, height];
+        grid = new PrefabData[width, height];
 
-        int roomCount = 10;
-
-        for (int i = 0; i < roomCount; i++)
-        {
-            int roomW = Random.Range(6, 10);
-            int roomH = Random.Range(6, 10);
-            int x = Random.Range(1, width - roomW - 1);
-            int y = Random.Range(1, height - roomH - 1);
-
-            for (int rx = x; rx < x + roomW; rx++)
-            {
-                for (int ry = y; ry < y + roomH; ry++)
-                {
-                    grid[rx, ry] = CellType.Floor;
-                }
-            }
-        }
-    }
-
-    void BuildWallMaps()
-    {
-        xWalls = new bool[width, height];
-        yWalls = new bool[width, height];
+        Vector2Int start = new Vector2Int(width / 2, height / 2);
+        Place(start.x, start.y, GetRandomRoom());
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (!IsFloor(x, y)) continue;
+                if (grid[x, y] != null) continue;
 
-                if (!IsFloor(x, y + 1))
-                    yWalls[x, y] = true;
-
-                if (!IsFloor(x + 1, y))
-                    xWalls[x, y] = true;
+                TryPlaceAt(x, y);
             }
         }
     }
 
-    void SpawnXWalls()
+    void TryPlaceAt(int x, int y)
     {
-        for (int x = 0; x < width; x++)
-        {
-            int runStart = -1;
+        var neighbors = GetNeighbors(x, y);
 
-            for (int y = 0; y <= height; y++)
+        if (neighbors.Count == 0) return;
+
+        // If ANY neighbor is a room → we MUST place a corridor
+        bool mustBeCorridor = false;
+        foreach (var n in neighbors)
+        {
+            if (n.type == PrefabType.Room)
             {
-                bool hasWall = (y < height) && xWalls[x, y];
-
-                if (hasWall && runStart == -1)
-                {
-                    runStart = y;
-                }
-                else if (!hasWall && runStart != -1)
-                {
-                    SpawnXWall(x, runStart, y - 1);
-                    runStart = -1;
-                }
+                mustBeCorridor = true;
+                break;
             }
         }
+
+        PrefabData prefab = mustBeCorridor
+            ? GetRandomCorridor()
+            : GetWeightedRandom(rooms, corridors);
+
+        Place(x, y, prefab);
     }
 
-    void SpawnYWalls()
+    void Place(int x, int y, PrefabData prefab)
     {
-        for (int y = 0; y < height; y++)
+        Quaternion rotation = FindValidRotation(x, y, prefab);
+
+        Vector3 pos = new Vector3(x * cellSize, 0, y * cellSize);
+        Instantiate(prefab.gameObject, pos, rotation, transform);
+
+        grid[x, y] = prefab;
+    }
+
+    Quaternion FindValidRotation(int x, int y, PrefabData prefab)
+    {
+        foreach (var rot in new[] { 0, 90, 180, 270 })
         {
-            int runStart = -1;
+            var rotatedDirs = Rotate(prefab.openSides, rot);
 
-            for (int x = 0; x <= width; x++)
-            {
-                bool hasWall = (x < width) && yWalls[x, y];
-
-                if (hasWall && runStart == -1)
-                {
-                    runStart = x;
-                }
-                else if (!hasWall && runStart != -1)
-                {
-                    SpawnYWall(runStart, x - 1, y);
-                    runStart = -1;
-                }
-            }
+            if (MatchesNeighbors(x, y, rotatedDirs))
+                return Quaternion.Euler(0, rot, 0);
         }
+
+        return Quaternion.identity;
     }
 
-    void SpawnSouthWalls()
+    bool MatchesNeighbors(int x, int y, OpenSides rotatedDirs)
     {
-        for (int y = 0; y < height; y++)
+        // West neighbor
+        if (x > 0 && grid[x - 1, y] != null)
         {
-            int runStart = -1;
-
-            for (int x = 0; x <= width; x++)
-            {
-                bool hasWall =
-                    (x < width) &&
-                    (y > 0) &&
-                    yWalls[x, y - 1];
-
-                if (hasWall && runStart == -1)
-                {
-                    runStart = x;
-                }
-                else if (!hasWall && runStart != -1)
-                {
-                    SpawnSouthWall(runStart, x - 1, y);
-                    runStart = -1;
-                }
-            }
+            if (!HasConnection(rotatedDirs, OpenSides.West) ||
+                !HasConnection(grid[x - 1, y].openSides, OpenSides.East))
+                return false;
         }
-    }
 
-
-    void SpawnXWall(int x, int startY, int endY)
-    {
-        int length = endY - startY + 1;
-        int wallCount = length / 3;
-
-        for (int i = 0; i < wallCount; i++)
+        // East neighbor
+        if (x < width - 1 && grid[x + 1, y] != null)
         {
-            int y = startY + i * 3 + 1;
-
-            Vector3 pos = new Vector3(
-                (x * tileSize) + wallThicknessOffset,
-                0,
-                (y + 1) * tileSize
-            );
-
-            Instantiate(GetRandWall(), pos, RotEast, transform);
+            if (!HasConnection(rotatedDirs, OpenSides.East) ||
+                !HasConnection(grid[x + 1, y].openSides, OpenSides.West))
+                return false;
         }
-    }
 
-    void SpawnYWall(int startX, int endX, int y)
-    {
-        int length = endX - startX + 1;
-        int wallCount = length / 3;
-
-        for (int i = 0; i < wallCount; i++)
+        // South neighbor
+        if (y > 0 && grid[x, y - 1] != null)
         {
-            int x = startX + i * 3 + 1;
-
-            Vector3 pos = new Vector3(
-                (x + 1) * tileSize,
-                0,
-                (y * tileSize) + wallThicknessOffset
-            );
-
-            Instantiate(GetRandWall(), pos, RotNorth, transform);
+            if (!HasConnection(rotatedDirs, OpenSides.South) ||
+                !HasConnection(grid[x, y - 1].openSides, OpenSides.North))
+                return false;
         }
-    }
 
-    void SpawnSouthWall(int startX, int endX, int y)
-    {
-        int length = endX - startX + 1;
-        int wallCount = length / 3;
-
-        for (int i = 0; i < wallCount; i++)
+        // North neighbor
+        if (y < height - 1 && grid[x, y + 1] != null)
         {
-            int centerX = startX + i * 3 + 1;
-
-            Vector3 pos = new Vector3(
-                centerX * tileSize,
-                0,
-                y * tileSize
-            );
-
-            Instantiate(GetRandWall(), pos, RotSouth, transform);
+            if (!HasConnection(rotatedDirs, OpenSides.North) ||
+                !HasConnection(grid[x, y + 1].openSides, OpenSides.South))
+                return false;
         }
+
+        return true;
     }
-
-
-    void SpawnFloors()
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                if (grid[x, y] == CellType.Floor)
-                {
-                    Instantiate(
-                        floorPrefab,
-                        new Vector3(x, 0, y),
-                        Quaternion.identity,
-                        transform
-                    );
-                }
-            }
-        }
-    }
-
-    GameObject GetRandWall()
-    {
-        return wallPreFabs[Random.Range(0, wallPreFabs.Length)];
-    }
-
-    void SpawnWall(Vector3 position, Quaternion rotation)
-    {
-        Instantiate(GetRandWall(), position, rotation, transform);
-    }
-
-    Vector3 GridToWorld(int x, int y)
-    {
-        return new Vector3(x * tileSize, 0, y * tileSize);
-    }
-
-    bool IsFloor(int x, int y)
-    {
-        if (x < 0 || y < 0 || x >= width || y >= height)
-            return false;
     
-        return grid[x, y] == CellType.Floor;
+    bool HasConnection(OpenSides set, OpenSides test)
+    {
+        return (set & test) != 0;
+    }
+
+    List<PrefabData> GetNeighbors(int x, int y)
+    {
+        var list = new List<PrefabData>();
+
+        if (x > 0 && grid[x - 1, y]) list.Add(grid[x - 1, y]);
+        if (x < width - 1 && grid[x + 1, y]) list.Add(grid[x + 1, y]);
+        if (y > 0 && grid[x, y - 1]) list.Add(grid[x, y - 1]);
+        if (y < height - 1 && grid[x, y + 1]) list.Add(grid[x, y + 1]);
+
+        return list;
+    }
+
+    PrefabData GetRandomRoom() => GetWeightedRandom(rooms);
+    PrefabData GetRandomCorridor() => GetWeightedRandom(corridors);
+
+    PrefabData GetWeightedRandom(params List<PrefabData>[] lists)
+    {
+        int total = 0;
+        foreach (var list in lists)
+            foreach (var p in list)
+                total += p.spawnWeight;
+
+        int roll = Random.Range(0, total);
+
+        foreach (var list in lists)
+        {
+            foreach (var p in list)
+            {
+                roll -= p.spawnWeight;
+                if (roll < 0)
+                    return p;
+            }
+        }
+
+        return lists[0][0];
+    }
+
+    OpenSides Rotate(OpenSides dir, int angle)
+    {
+        int steps = angle / 90;
+        for (int i = 0; i < steps; i++)
+        {
+            dir = ((dir & OpenSides.North) != 0 ? OpenSides.East : 0)
+                | ((dir & OpenSides.East) != 0 ? OpenSides.South : 0)
+                | ((dir & OpenSides.South) != 0 ? OpenSides.West : 0)
+                | ((dir & OpenSides.West) != 0 ? OpenSides.North : 0);
+        }
+        return dir;
     }
 }
