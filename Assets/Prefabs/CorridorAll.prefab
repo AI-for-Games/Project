@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 893468621320427892}
   - component: {fileID: 9142974221701779252}
   m_Layer: 0
-  m_Name: CorridorCrossing
+  m_Name: CorridorAll
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

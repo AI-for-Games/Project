@@ -3,12 +3,11 @@ using UnityEngine;
 public enum PrefabType
 {
     Room,
-    Corridor,
-    Joint
+    Corridor
 }
 
 [System.Flags]
-public enum OpenSides
+public enum Directions
 {
     None = 0,
     North = 1 << 0,
@@ -22,7 +21,7 @@ public class PrefabData : MonoBehaviour
     public PrefabType type;
     
     [Tooltip("Which sides are open (in default rotation)")]
-    public OpenSides openSides;
+    public Directions openSides;
     
     [Tooltip("Relative spawn weight (higher = more often")]
     public int spawnWeight = 1;

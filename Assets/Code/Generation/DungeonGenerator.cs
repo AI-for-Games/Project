@@ -1,176 +1,125 @@
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Properties;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class DungeonGenerator : MonoBehaviour
+namespace Code.Generation
 {
-    public int width = 20;
-    public int height = 20;
-    public float cellSize = 20f;
-
-    public List<PrefabData> rooms;
-    public List<PrefabData> corridors;
-
-    private PrefabData[,] grid;
-
-    void Start()
+    public class DungeonGenerator : MonoBehaviour
     {
-        Generate();
-    }
+        public int gridWidth = 20;
+        public int gridHeight = 20;
+        public float cellSize = 20f;
 
-    void Generate()
-    {
-        grid = new PrefabData[width, height];
+        public List<PrefabData> rooms;
+        public List<PrefabData> corridors;
 
-        Vector2Int start = new Vector2Int(width / 2, height / 2);
-        Place(start.x, start.y, GetRandomRoom());
+        private List<PrefabData> _roomAlls;
+        private List<PrefabData> _roomCorners;
+        private List<PrefabData> _roomStraights;
+        private List<PrefabData> _roomTs;
+        private List<PrefabData> _roomEnds;
 
-        for (int x = 0; x < width; x++)
+        private List<PrefabData> _corridorAlls;
+        private List<PrefabData> _corridorCorners;
+        private List<PrefabData> _corridorStraights;
+        private List<PrefabData> _corridorTs;
+
+        private PrefabData[,] _grid;
+        
+        private Vector3 _startOffset;
+
+        void Start()
         {
-            for (int y = 0; y < height; y++)
+            Generate();
+        }
+
+        void Generate()
+        {
+            _grid = new PrefabData[gridWidth, gridHeight];  // Create blank 2D array
+            _startOffset = transform.position;  // Fetch start offset (generator pos)
+
+            SpawnCell(0, 0, true);  // Start cell in center (catalyst for generation)
+
+            SpawnAdjacent(0, 0);
+        }
+
+        void SpawnAdjacent(int gridX, int gridY, int maxDepth = 5, int currentDepth = 0)
+        {
+            var existingPrefab = _grid[gridX, gridY];
+            if ((existingPrefab.openSides & Directions.North) != 0)  // If current cell is open on top
             {
-                if (grid[x, y] != null) continue;
-
-                TryPlaceAt(x, y);
-            }
-        }
-    }
-
-    void TryPlaceAt(int x, int y)
-    {
-        var neighbors = GetNeighbors(x, y);
-
-        if (neighbors.Count == 0) return;
-
-        // If ANY neighbor is a room → we MUST place a corridor
-        bool mustBeCorridor = false;
-        foreach (var n in neighbors)
-        {
-            if (n.type == PrefabType.Room)
-            {
-                mustBeCorridor = true;
-                break;
-            }
-        }
-
-        PrefabData prefab = mustBeCorridor
-            ? GetRandomCorridor()
-            : GetWeightedRandom(rooms, corridors);
-
-        Place(x, y, prefab);
-    }
-
-    void Place(int x, int y, PrefabData prefab)
-    {
-        Quaternion rotation = FindValidRotation(x, y, prefab);
-
-        Vector3 pos = new Vector3(x * cellSize, 0, y * cellSize);
-        Instantiate(prefab.gameObject, pos, rotation, transform);
-
-        grid[x, y] = prefab;
-    }
-
-    Quaternion FindValidRotation(int x, int y, PrefabData prefab)
-    {
-        foreach (var rot in new[] { 0, 90, 180, 270 })
-        {
-            var rotatedDirs = Rotate(prefab.openSides, rot);
-
-            if (MatchesNeighbors(x, y, rotatedDirs))
-                return Quaternion.Euler(0, rot, 0);
-        }
-
-        return Quaternion.identity;
-    }
-
-    bool MatchesNeighbors(int x, int y, OpenSides rotatedDirs)
-    {
-        // West neighbor
-        if (x > 0 && grid[x - 1, y] != null)
-        {
-            if (!HasConnection(rotatedDirs, OpenSides.West) ||
-                !HasConnection(grid[x - 1, y].openSides, OpenSides.East))
-                return false;
-        }
-
-        // East neighbor
-        if (x < width - 1 && grid[x + 1, y] != null)
-        {
-            if (!HasConnection(rotatedDirs, OpenSides.East) ||
-                !HasConnection(grid[x + 1, y].openSides, OpenSides.West))
-                return false;
-        }
-
-        // South neighbor
-        if (y > 0 && grid[x, y - 1] != null)
-        {
-            if (!HasConnection(rotatedDirs, OpenSides.South) ||
-                !HasConnection(grid[x, y - 1].openSides, OpenSides.North))
-                return false;
-        }
-
-        // North neighbor
-        if (y < height - 1 && grid[x, y + 1] != null)
-        {
-            if (!HasConnection(rotatedDirs, OpenSides.North) ||
-                !HasConnection(grid[x, y + 1].openSides, OpenSides.South))
-                return false;
-        }
-
-        return true;
-    }
-    
-    bool HasConnection(OpenSides set, OpenSides test)
-    {
-        return (set & test) != 0;
-    }
-
-    List<PrefabData> GetNeighbors(int x, int y)
-    {
-        var list = new List<PrefabData>();
-
-        if (x > 0 && grid[x - 1, y]) list.Add(grid[x - 1, y]);
-        if (x < width - 1 && grid[x + 1, y]) list.Add(grid[x + 1, y]);
-        if (y > 0 && grid[x, y - 1]) list.Add(grid[x, y - 1]);
-        if (y < height - 1 && grid[x, y + 1]) list.Add(grid[x, y + 1]);
-
-        return list;
-    }
-
-    PrefabData GetRandomRoom() => GetWeightedRandom(rooms);
-    PrefabData GetRandomCorridor() => GetWeightedRandom(corridors);
-
-    PrefabData GetWeightedRandom(params List<PrefabData>[] lists)
-    {
-        int total = 0;
-        foreach (var list in lists)
-            foreach (var p in list)
-                total += p.spawnWeight;
-
-        int roll = Random.Range(0, total);
-
-        foreach (var list in lists)
-        {
-            foreach (var p in list)
-            {
-                roll -= p.spawnWeight;
-                if (roll < 0)
-                    return p;
+                SpawnCell(gridX, gridY - 1, existingPrefab.type == PrefabType.Corridor);
             }
         }
 
-        return lists[0][0];
-    }
-
-    OpenSides Rotate(OpenSides dir, int angle)
-    {
-        int steps = angle / 90;
-        for (int i = 0; i < steps; i++)
+        Directions GetRequiredDirections(int gridX, int gridY)  // Check adjacent cells for required directions
         {
-            dir = ((dir & OpenSides.North) != 0 ? OpenSides.East : 0)
-                | ((dir & OpenSides.East) != 0 ? OpenSides.South : 0)
-                | ((dir & OpenSides.South) != 0 ? OpenSides.West : 0)
-                | ((dir & OpenSides.West) != 0 ? OpenSides.North : 0);
+            var requiredDirections = Directions.None;
+            
+            // Top cell
+            if (gridY < gridHeight - 2 && (_grid[gridX, gridY - 1].openSides & Directions.South) != 0)  // If cell has South open
+            {
+                requiredDirections |= Directions.North;  // Require North direction (to join the open south)
+            }
+            
+            // Right cell
+            if (gridX < gridWidth - 2 && (_grid[gridX + 1, gridY].openSides & Directions.West) != 0)  // Check West of other
+            {
+                requiredDirections |= Directions.East;  // If valid set East of current to required
+            }
+            
+            // Bottom cell
+            if (gridY > 0 && (_grid[gridX, gridY - 1].openSides & Directions.North) != 0)  // Check North of other
+            {
+                requiredDirections |= Directions.South;  // If valid set South of current to required
+            }
+            
+            // Left cell
+            if (gridX <= 0 && (_grid[gridX - 1, gridY].openSides & Directions.East) != 0)  // Check East of other
+            {
+                requiredDirections |= Directions.West;  // If valid set West of current to required
+            }
+
+            return requiredDirections;  // Return complete required directions
         }
-        return dir;
+
+        bool IsValidPrefab(PrefabData data, Directions requiredDirections)
+        {
+            return (data.openSides & requiredDirections) ==  requiredDirections;  // Prefab has at LEAST required dirs
+        }
+
+        void SpawnCell(int gridX, int gridY, bool isRoom)
+        {
+            var rot = Quaternion.Euler(0, 0, 0);
+            Vector3 pos = new Vector3(gridX * cellSize, 0, gridY * cellSize);
+
+            _grid[gridX, gridY] = isRoom ? GetRandomRoom() : GetRandomCorridor();
+            
+            Instantiate(_grid[gridX, gridY], pos, rot);
+        }
+
+        PrefabData GetRandomRoom() => GetWeightedRandom(rooms);
+        PrefabData GetRandomCorridor() => GetWeightedRandom(corridors);
+
+        PrefabData GetWeightedRandom(params List<PrefabData>[] lists)
+        {
+            var total = lists.SelectMany(list => list).Sum(p => p.spawnWeight);  // Total weight in list
+            var roll = Random.Range(0, total);  // Random start
+
+            foreach (var list in lists)
+            {
+                foreach (var p in list)
+                {
+                    roll -= p.spawnWeight;
+                    if (roll < 0)
+                        return p;
+                }
+            }
+
+            return lists[0][0];
+        }
     }
 }

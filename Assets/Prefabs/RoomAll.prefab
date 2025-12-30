@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5592041648985391793}
   - component: {fileID: 8192441639194449984}
   m_Layer: 0
-  m_Name: RoomCrossing
+  m_Name: RoomAll
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
