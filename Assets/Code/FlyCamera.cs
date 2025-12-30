@@ -1,49 +1,78 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class FlyCamera : MonoBehaviour
+namespace Code
 {
-    public float moveSpeed = 10f;
-    public float mouseSensitivity = 2f;
-
-    float rotationX = 0f;
-
-    void Start()
+    public class FlyCamera : MonoBehaviour
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+        [Header("Movement Settings")]
+        public float moveSpeed = 10f;        // Movement speed
+        public float boostMultiplier = 2f;   // Speed boost when holding Shift
+        public float lookSpeed = 3f;         // Mouse look sensitivity
 
-    void Update()
-    {
-        Look();
-        Move();
-    }
+        private bool _cursorLocked = true;
 
-    void Look()
-    {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * 100f * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * 100f * Time.deltaTime;
+        void Start()
+        {
+            LockCursor(true);
+        }
 
-        rotationX -= mouseY;
-        rotationX = Mathf.Clamp(rotationX, -90f, 90f);
+        void Update()
+        {
+            // Only respond if the game window is focused
+            if (!Application.isFocused) return;
 
-        transform.localRotation = Quaternion.Euler(rotationX, transform.localEulerAngles.y + mouseX, 0f);
-    }
+            // Toggle cursor lock with Escape
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                _cursorLocked = !_cursorLocked;
+                LockCursor(_cursorLocked);
+            }
 
-    void Move()
-    {
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+            if (_cursorLocked)
+            {
+                HandleLook();
+                HandleMovement();
+            }
+        }
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        transform.position += move * moveSpeed * Time.deltaTime;
+        private void HandleLook()
+        {
+            float mouseX = Input.GetAxis("Mouse X") * lookSpeed;
+            float mouseY = Input.GetAxis("Mouse Y") * lookSpeed;
 
-        if (Input.GetKey(KeyCode.E))
-            transform.position += Vector3.up * moveSpeed * Time.deltaTime;
+            // Rotate camera horizontally
+            transform.Rotate(Vector3.up, mouseX, Space.World);
 
-        if (Input.GetKey(KeyCode.Q))
-            transform.position += Vector3.down * moveSpeed * Time.deltaTime;
+            // Rotate camera vertically
+            transform.Rotate(Vector3.left, mouseY, Space.Self);
+        }
+
+        private void HandleMovement()
+        {
+            float speed = moveSpeed;
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                speed *= boostMultiplier;
+
+            Vector3 forward = transform.forward;
+            Vector3 right = transform.right;
+            Vector3 up = transform.up;
+
+            Vector3 move = Vector3.zero;
+
+            if (Input.GetKey(KeyCode.W)) move += forward;
+            if (Input.GetKey(KeyCode.S)) move -= forward;
+            if (Input.GetKey(KeyCode.A)) move -= right;
+            if (Input.GetKey(KeyCode.D)) move += right;
+            if (Input.GetKey(KeyCode.Q)) move -= up;
+            if (Input.GetKey(KeyCode.E)) move += up;
+
+            transform.position += move * (speed * Time.deltaTime);
+        }
+
+        private void LockCursor(bool locked)
+        {
+            Cursor.visible = !locked;
+            Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        }
     }
 }
