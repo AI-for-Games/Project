@@ -984,6 +984,7 @@ MonoBehaviour:
   prefabs:
   - {fileID: 4901280172326512471, guid: 0d4eef0ee26dc5c46bd3112947fd3d65, type: 3}
   - {fileID: 4196189381377484779, guid: 266c2ac4d92323045bca7c07b8993951, type: 3}
+  - {fileID: 4196189381377484779, guid: c48df4c54dbfade4ba7aa324c66db7a0, type: 3}
   - {fileID: 8375649377826868681, guid: ebeec060c976cc44eb50ef16495ef618, type: 3}
   - {fileID: 8375649377826868681, guid: 8692ac265b2afb746b1cfd17b55bfcaf, type: 3}
   - {fileID: 7028860705964857599, guid: e30691ebdf80a9b45a8e99b3973b438f, type: 3}
@@ -991,8 +992,6 @@ MonoBehaviour:
   - {fileID: 5191843416875759565, guid: a709d8eced07c8e46b50ef5a747a0199, type: 3}
   - {fileID: 7028860705964857599, guid: 15d7eb62f0c37d549b810aaaccbddf2e, type: 3}
   - {fileID: 7826294317588985787, guid: 9f33de9d3ee81ad47bd904ac612a3d1e, type: 3}
-  rooms: []
-  corridors: []
 --- !u!4 &1410463658
 Transform:
   m_ObjectHideFlags: 0
