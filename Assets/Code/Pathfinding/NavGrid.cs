@@ -11,26 +11,26 @@ public class NavGrid : MonoBehaviour
     
     GridNode[,] grid;
     float nodeDiameter;
-    int grideSizeX, grideSizeY;
+    int gridSizeX, gridSizeY;
 
     void Start()
     {
         nodeDiameter = nodeRadius * 2;
-        grideSizeX = Mathf.RoundToInt(gridSize.x / nodeDiameter);
-        grideSizeY = Mathf.RoundToInt(gridSize.y / nodeDiameter);
+        gridSizeX = Mathf.RoundToInt(gridSize.x / nodeDiameter);
+        gridSizeY = Mathf.RoundToInt(gridSize.y / nodeDiameter);
         CreateGrid();
     }
 
     void CreateGrid()
     {
-        grid = new GridNode[grideSizeX, grideSizeY];
+        grid = new GridNode[gridSizeX, gridSizeY];
         Vector3 worldBottomLeft = transform.position
                                   - Vector3.right * gridSize.x / 2
                                   - Vector3.forward * gridSize.y / 2;
 
-        for (int x = 0; x < grideSizeX; x++)
+        for (int x = 0; x < gridSizeX; x++)
         {
-            for (int y = 0; y < grideSizeY; y++)
+            for (int y = 0; y < gridSizeY; y++)
             {
                 Vector3 worldPoint = worldBottomLeft
                                      + Vector3.right * (x * nodeDiameter)
@@ -44,15 +44,22 @@ public class NavGrid : MonoBehaviour
 
     public GridNode NodeFromWorldPoint(Vector3 worldPosition)
     {
-        float PercentageX = (worldPosition.x / gridSize.x) * nodeDiameter;
-        float PercentageY = (worldPosition.y / gridSize.y) * nodeDiameter;
-        
-        PercentageX = Mathf.Clamp01(PercentageX);
-        PercentageY = Mathf.Clamp01(PercentageY);
-        
-        int x = Mathf.RoundToInt((gridSize.x - 1) * grideSizeX);
-        int y = Mathf.RoundToInt((gridSize.y - 1) * grideSizeY);
-        
+        float percentX = (worldPosition.x - transform.position.x + gridSize.x / 2) / gridSize.x;
+        float percentY = (worldPosition.z - transform.position.z + gridSize.y / 2) / gridSize.y;
+
+        percentX = Mathf.Clamp01(percentX);
+        percentY = Mathf.Clamp01(percentY);
+
+        int x = Mathf.Clamp(
+            Mathf.FloorToInt(percentX * gridSizeX),
+            0, gridSizeX - 1
+        );
+
+        int y = Mathf.Clamp(
+            Mathf.FloorToInt(percentY * gridSizeY),
+            0, gridSizeY - 1
+        );
+
         return grid[x, y];
     }
 
@@ -70,7 +77,7 @@ public class NavGrid : MonoBehaviour
                 int checkX = node.gridX + x;
                 int checkY = node.gridY + y;
 
-                if (checkX >= 0 && checkX < grideSizeX && checkY >= 0 && checkY < grideSizeY)
+                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
                 {
                     neighbours.Add(grid[checkX, checkY]);
                 }
@@ -78,17 +85,28 @@ public class NavGrid : MonoBehaviour
         }
         return neighbours;
     }
-
+    
     void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position, new Vector3(gridSize.x, 1, gridSize.y));
-        
-        if (grid != null) return;
-
-        foreach (GridNode node in grid)
+        if (!Application.isPlaying && grid == null)
         {
-            Gizmos.color = node.walkable ? Color.white : Color.red;
-            Gizmos.DrawCube(node.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
+            nodeDiameter = nodeRadius * 2;
+            gridSizeX = Mathf.RoundToInt(gridSize.x / nodeDiameter);
+            gridSizeY = Mathf.RoundToInt(gridSize.y / nodeDiameter);
+            CreateGrid();
+        }
+
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(transform.position,
+            new Vector3(gridSize.x, 1, gridSize.y));
+
+        if (grid == null) return;
+
+        foreach (GridNode n in grid)
+        {
+            Gizmos.color = n.walkable ? Color.white : Color.red;
+            Gizmos.DrawCube(n.worldPosition,
+                Vector3.one * (nodeDiameter - 0.1f));
         }
     }
 }
