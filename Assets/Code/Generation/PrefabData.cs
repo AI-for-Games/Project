@@ -1,28 +1,46 @@
+using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public enum PrefabType
+namespace Code.Generation
 {
-    Room,
-    Corridor
-}
+    public enum PrefabCategory
+    {
+        Room,
+        Corridor
+    }
 
-[System.Flags]
-public enum Directions
-{
-    None = 0,
-    North = 1 << 0,
-    East = 1 << 1,
-    South = 1 << 2,
-    West = 1 << 3
-}
+    public enum PrefabType
+    {
+        Corner,
+        Crossover,
+        End,
+        Straight,
+        T
+    }
 
-public class PrefabData : MonoBehaviour
-{
-    public PrefabType type;
-    
-    [Tooltip("Which sides are open (in default rotation)")]
-    public Directions openSides;
-    
-    [Tooltip("Relative spawn weight (higher = more often")]
-    public int spawnWeight = 1;
+    [Flags]
+    public enum Directions
+    {
+        None = 0,
+        North = 1 << 0,
+        East = 1 << 1,
+        South = 1 << 2,
+        West = 1 << 3
+    }
+
+    public class PrefabData : MonoBehaviour
+    {
+        [Tooltip("Which category is the prefab in")]
+        public PrefabCategory category;
+
+        [Tooltip("Type of piece the prefab is (its connections)")]
+        public PrefabType type;
+
+        [Tooltip("Relative spawn weight (higher = more often")]
+        public int spawnWeight = 1;
+        
+        [HideInInspector]
+        public Directions openSides = Directions.None;
+    }
 }

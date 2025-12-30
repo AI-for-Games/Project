@@ -61,9 +61,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff1c83488107bc94d8911b61afd0026e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 1
-  openSides: 3
+  category: 1
+  type: 0
   spawnWeight: 1
+  openSides: 3
 --- !u!1001 &1613185872998695237
 PrefabInstance:
   m_ObjectHideFlags: 0
