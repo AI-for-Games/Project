@@ -9,36 +9,41 @@ namespace Code
         public float boostMultiplier = 2f;   // Speed boost when holding Shift
         public float lookSpeed = 3f;         // Mouse look sensitivity
 
-        private bool _cursorLocked;
+        private bool _cameraFocused;
 
-        void Start()
+        private void Start()
         {
-            LockCursor(false);
+            SetFocus(false);
+        }
+        
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus) 
+                SetFocus(true);
         }
 
-        void Update()
+        private void Update()
         {
             // Only respond if the game window is focused
             if (!Application.isFocused) return;
 
+            if (!_cameraFocused && Input.GetMouseButton(0))
+                SetFocus(true);
+
             // Toggle cursor lock with Escape
             if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                _cursorLocked = !_cursorLocked;
-                LockCursor(_cursorLocked);
-            }
-
-            if (_cursorLocked)
-            {
-                HandleLook();
-                HandleMovement();
-            }
+                SetFocus(!_cameraFocused);
+            
+            if (!_cameraFocused) return;
+            
+            HandleLook();
+            HandleMovement();
         }
 
         private void HandleLook()
         {
-            float mouseX = Input.GetAxis("Mouse X") * lookSpeed;
-            float mouseY = Input.GetAxis("Mouse Y") * lookSpeed;
+            var mouseX = Input.GetAxis("Mouse X") * lookSpeed;
+            var mouseY = Input.GetAxis("Mouse Y") * lookSpeed;
 
             // Rotate camera horizontally
             transform.Rotate(Vector3.up, mouseX, Space.World);
@@ -49,15 +54,15 @@ namespace Code
 
         private void HandleMovement()
         {
-            float speed = moveSpeed;
+            var speed = moveSpeed;
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 speed *= boostMultiplier;
 
-            Vector3 forward = transform.forward;
-            Vector3 right = transform.right;
-            Vector3 up = transform.up;
+            var forward = transform.forward;
+            var right = transform.right;
+            var up = transform.up;
 
-            Vector3 move = Vector3.zero;
+            var move = Vector3.zero;
 
             if (Input.GetKey(KeyCode.W)) move += forward;
             if (Input.GetKey(KeyCode.S)) move -= forward;
@@ -69,10 +74,11 @@ namespace Code
             transform.position += move * (speed * Time.deltaTime);
         }
 
-        private void LockCursor(bool locked)
+        private void SetFocus(bool focus)
         {
-            Cursor.visible = !locked;
-            Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+            _cameraFocused = focus;
+            Cursor.visible = !focus;
+            Cursor.lockState = focus ? CursorLockMode.Locked : CursorLockMode.None;
         }
     }
 }
