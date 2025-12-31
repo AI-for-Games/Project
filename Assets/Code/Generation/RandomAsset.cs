@@ -10,10 +10,10 @@ namespace Code.Generation
 {
     public class RandomAsset : MonoBehaviour
     {
-        [Header("Variants (prefabs must have MeshFilter/MeshRenderer)")]
+        [Header("Variants")]
         public List<GameObject> variants;
-
-        [Header("Optional Weighting")]
+        
+        [Header("Weights")]
         public bool useWeights;
         public List<float> weights;
 

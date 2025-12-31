@@ -104,8 +104,11 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: f597f57597220b8408f938965042c9ec, type: 3}
   - {fileID: 919132149155446097, guid: 2ba03a0b5ee8b6e408050906bd6e22e3, type: 3}
   useWeights: 0
-  weights: []
+  weights:
+  - 1
+  - 1
+  - 1
+  - 1
   spawnOnAwake: 1
-  destroySelfAfterSpawn: 0
   previewInEditor: 1
-  previewIndex: 0
+  previewIndex: -1

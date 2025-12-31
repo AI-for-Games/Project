@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -33,14 +32,14 @@ namespace Code.Generation
         
         private CookedPrefab[,] _grid;
 
-        void Start()
+        private void Start()
         {
             LoadPrefabs();
             Generate();
             OnDungeonGenerated?.Invoke();  // Trigger finished generation event
         }
 
-        void LoadPrefabs()
+        private void LoadPrefabs()
         {
             _cookedPrefabs = new List<CookedPrefab>();  // Clear any previously generated prefabs
             _rooms = new List<CookedPrefab>();
@@ -65,10 +64,12 @@ namespace Code.Generation
                     case PrefabType.T:
                         prefab.openSides = Directions.North | Directions.East | Directions.West;
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
                 
                 var sides = prefab.openSides;
-                for (int i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
                     _cookedPrefabs.Add(new CookedPrefab
                     {
@@ -91,7 +92,7 @@ namespace Code.Generation
             _corridors.Sort((a, b) => b.Original.spawnWeight.CompareTo(a.Original.spawnWeight));
         }
 
-        void Generate()
+        private void Generate()
         {
             _grid = new CookedPrefab[gridWidth, gridHeight]; // Create blank 2D array
 
@@ -100,8 +101,8 @@ namespace Code.Generation
             
             SpawnAdjacent(0, 0, 2000);
         }
-        
-        void SpawnAdjacent(int gridX, int gridY, int maxDepth = 5, int currentDepth = 0)
+
+        private void SpawnAdjacent(int gridX, int gridY, int maxDepth = 5, int currentDepth = 0)
         {
             if (currentDepth >= maxDepth)
                 return;
@@ -109,7 +110,7 @@ namespace Code.Generation
             var existing = _grid[gridX, gridY];
 
             // Corridors can spawn both types, rooms can only spawn corridors
-            var isRoom = existing.Original.category == PrefabCategory.Corridor && RandBool(roomChance);
+            var isRoom = existing.Original.category == PrefabCategory.Corridor && RandBool(roomChance);  // TODO: Check adjacent cells, if any are a room (that require a connection) then must be corridor, set while checking?
 
             // North cell
             if ((existing.OpenSides & Directions.North) != 0 && InBounds(gridX, gridY + 1) &&  // If open and in bounds
@@ -144,7 +145,7 @@ namespace Code.Generation
             }
         }
 
-        CookedPrefab FindValidPrefab(int gridX, int gridY, bool isRoom)
+        private CookedPrefab FindValidPrefab(int gridX, int gridY, bool isRoom)
         {
             var pool = isRoom ? _rooms : _corridors;
             var validOptions = new List<CookedPrefab>();
@@ -182,14 +183,8 @@ namespace Code.Generation
 #endif
             return _rooms[0];  // Fallback to prevent crash or empty cells (won't be right!)
         }
-        
-        bool IsValidPrefab(int gridX, int gridY, CookedPrefab prefab)
-        {
-            return MeetsRequiredDir(prefab.OpenSides, GetRequiredDirections(gridX, gridY)) &&
-                AvoidsBlockedDir(prefab.OpenSides, GetBlockedDirections(gridX, gridY));
-        }
 
-        Directions GetRequiredDirections(int gridX, int gridY)
+        private Directions GetRequiredDirections(int gridX, int gridY)
         {
             var required = Directions.None;
 
@@ -221,7 +216,7 @@ namespace Code.Generation
         }
 
 
-        Directions GetBlockedDirections(int gridX, int gridY)
+        private Directions GetBlockedDirections(int gridX, int gridY)
         {
             var blocked = Directions.None;
 
@@ -256,27 +251,33 @@ namespace Code.Generation
             return blocked;
         }
 
-
-        bool MeetsRequiredDir(Directions prefabDirections, Directions requiredDirections)
-        {
-            return (prefabDirections & requiredDirections) == requiredDirections;  // Prefab has at LEAST required dirs
-        }
-
-        bool AvoidsBlockedDir(Directions prefabDirections, Directions blockedDirections)
-        {
-            return (prefabDirections & blockedDirections) == Directions.None;
-        }
-
-        void SpawnCell(int gridX, int gridY, CookedPrefab prefab)
+        private void SpawnCell(int gridX, int gridY, CookedPrefab prefab)
         {
             var rot = Quaternion.Euler(0, prefab.Rotation, 0);
-            Vector3 pos = transform.position + new Vector3(gridX * cellSize, 0, gridY * cellSize);
+            var pos = transform.position + new Vector3(gridX * cellSize, 0, gridY * cellSize);
             
             _grid[gridX, gridY] = prefab;
             Instantiate(prefab.Original, pos, rot);
         }
 
-        List<CookedPrefab> FilterPrefabs(List<PrefabCategory> categories = null, List<PrefabType> types = null)
+        private bool InBounds(int x, int y)
+        {
+            return x >= 0 && x < gridWidth &&
+                   y >= 0 && y < gridHeight;
+        }
+
+        private bool IsOccupied(int x, int y)
+        {
+            return InBounds(x, y) && _grid[x, y].Original != null;
+        }
+        
+        private bool IsValidPrefab(int gridX, int gridY, CookedPrefab prefab)
+        {
+            return MeetsRequiredDir(prefab.OpenSides, GetRequiredDirections(gridX, gridY)) &&
+                   AvoidsBlockedDir(prefab.OpenSides, GetBlockedDirections(gridX, gridY));
+        }
+        
+        private List<CookedPrefab> FilterPrefabs(List<PrefabCategory> categories = null, List<PrefabType> types = null)
         {
             IEnumerable<CookedPrefab> query = _cookedPrefabs;
 
@@ -288,8 +289,35 @@ namespace Code.Generation
             
             return query.ToList();
         }
+        
+        private static bool RandBool(float trueWeight)
+        {
+            return Random.value < trueWeight;
+        }
+        
+        private static Directions RotateDir(Directions dirs)
+        {
+            var result = Directions.None;
 
-        CookedPrefab GetWeightedRandom(params List<CookedPrefab>[] lists)
+            if ((dirs & Directions.North) != 0) result |= Directions.East;
+            if ((dirs & Directions.East)  != 0) result |= Directions.South;
+            if ((dirs & Directions.South) != 0) result |= Directions.West;
+            if ((dirs & Directions.West)  != 0) result |= Directions.North;
+
+            return result;
+        }
+        
+        private static bool MeetsRequiredDir(Directions prefabDirections, Directions requiredDirections)
+        {
+            return (prefabDirections & requiredDirections) == requiredDirections;  // Prefab has at LEAST required dirs
+        }
+
+        private static bool AvoidsBlockedDir(Directions prefabDirections, Directions blockedDirections)
+        {
+            return (prefabDirections & blockedDirections) == Directions.None;
+        }
+        
+        private static CookedPrefab GetWeightedRandom(params List<CookedPrefab>[] lists)
         {
             var total = lists.SelectMany(list => list).Sum(p => p.Original.spawnWeight);  // Total weight in list
             var roll = Random.Range(0, total);  // Random start
@@ -305,35 +333,6 @@ namespace Code.Generation
             }
 
             return lists[0][0];
-        }
-
-        private Directions RotateDir(Directions dirs)
-        {
-            Directions result = Directions.None;
-
-            if ((dirs & Directions.North) != 0) result |= Directions.East;
-            if ((dirs & Directions.East)  != 0) result |= Directions.South;
-            if ((dirs & Directions.South) != 0) result |= Directions.West;
-            if ((dirs & Directions.West)  != 0) result |= Directions.North;
-
-            return result;
-        }
-        
-        bool InBounds(int x, int y)
-        {
-            return x >= 0 && x < gridWidth &&
-                   y >= 0 && y < gridHeight;
-        }
-
-        bool IsOccupied(int x, int y)
-        {
-            return InBounds(x, y) && _grid[x, y].Original != null;
-        }
-
-
-        bool RandBool(float trueWeight)
-        {
-            return Random.value < trueWeight;
         }
     }
 }
