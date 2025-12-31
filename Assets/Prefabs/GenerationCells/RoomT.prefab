@@ -87,7 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   category: 0
-  type: 0
+  type: 4
   spawnWeight: 1
   openSides: 3
 --- !u!1001 &545071423043505315

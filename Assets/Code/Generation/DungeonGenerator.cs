@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -15,6 +17,8 @@ namespace Code.Generation
     
     public class DungeonGenerator : MonoBehaviour
     {
+        public static event Action OnDungeonGenerated;  // Event that fires when generation is done
+        
         public int gridWidth = 20;
         public int gridHeight = 20;
         public float cellSize = 20f;
@@ -33,6 +37,7 @@ namespace Code.Generation
         {
             LoadPrefabs();
             Generate();
+            OnDungeonGenerated?.Invoke();  // Trigger finished generation event
         }
 
         void LoadPrefabs()
@@ -76,8 +81,14 @@ namespace Code.Generation
                 }
             }
             
+            // Split cooked fabs into rooms and corridors for future use
             _rooms = FilterPrefabs(new List<PrefabCategory> { PrefabCategory.Room });
             _corridors = FilterPrefabs(new List<PrefabCategory> { PrefabCategory.Corridor });
+            
+            // Sort the lists based on spawnWeight (we will check for more common ones first)
+            _cookedPrefabs.Sort((a, b) => b.Original.spawnWeight.CompareTo(a.Original.spawnWeight));
+            _rooms.Sort((a, b) => b.Original.spawnWeight.CompareTo(a.Original.spawnWeight));
+            _corridors.Sort((a, b) => b.Original.spawnWeight.CompareTo(a.Original.spawnWeight));
         }
 
         void Generate()
@@ -85,7 +96,7 @@ namespace Code.Generation
             _grid = new CookedPrefab[gridWidth, gridHeight]; // Create blank 2D array
 
             SpawnCell(0, 0, FindValidPrefab(0, 0, true));  // Spawn a room at 0,0 to start at
-            //SpawnCell(gridWidth - 1, gridHeight - 1, FindValidPrefab(gridWidth - 1, gridHeight - 1, true));
+            SpawnCell(gridWidth - 1, gridHeight - 1, FindValidPrefab(gridWidth - 1, gridHeight - 1, true));
             
             SpawnAdjacent(0, 0, 2000);
         }

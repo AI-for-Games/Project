@@ -9,11 +9,11 @@ namespace Code
         public float boostMultiplier = 2f;   // Speed boost when holding Shift
         public float lookSpeed = 3f;         // Mouse look sensitivity
 
-        private bool _cursorLocked = true;
+        private bool _cursorLocked;
 
         void Start()
         {
-            LockCursor(true);
+            LockCursor(false);
         }
 
         void Update()
