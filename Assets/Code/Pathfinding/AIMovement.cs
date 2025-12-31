@@ -10,9 +10,25 @@ public class AIMovement : MonoBehaviour
     List<GridNode> path;
     int pathIndex;
 
+    void OnEnable()
+    {
+        NavGrid.OnGridComplete += StartMovement;
+    }
+
+    void OnDisable()
+    {
+        NavGrid.OnGridComplete -= StartMovement;
+    }
+
     void Start()
     {
         pathfinding = FindObjectOfType<Pathfinding>();
+        //InvokeRepeating(nameof(UpdatePath), 0f, 0.5f);
+    }
+
+    void StartMovement()
+    {
+        Debug.Log("Starting movement");
         InvokeRepeating(nameof(UpdatePath), 0f, 0.5f);
     }
 

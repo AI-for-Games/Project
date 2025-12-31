@@ -38,7 +38,7 @@ namespace Code.Generation
         public PrefabType type;
 
         [Tooltip("Relative spawn weight (higher = more often")]
-        public int spawnWeight;
+        public float spawnWeight;
         
         [HideInInspector]
         public Directions openSides;

@@ -75,7 +75,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   category: 1
   type: 1
-  spawnWeight: 1
+  spawnWeight: 0.8
   openSides: 0
 --- !u!1001 &71269264987847924
 PrefabInstance:
