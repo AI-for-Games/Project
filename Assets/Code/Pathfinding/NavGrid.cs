@@ -12,6 +12,7 @@ public class NavGrid : MonoBehaviour
     public LayerMask unwalkableMask;
     public Vector2 gridSize;
     public float nodeRadius = 0.5f;
+    public bool autoStart = false;
     
     GridNode[,] grid;
     float nodeDiameter;
@@ -43,7 +44,11 @@ public class NavGrid : MonoBehaviour
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridSize.y / nodeDiameter);
-        //CreateGrid();
+        
+        if(autoStart)
+        {
+            CreateGrid();
+        }
     }
 
     void CreateGrid()

@@ -95,30 +95,4 @@ public class Pathfinding : MonoBehaviour
         }
         return 14 * distanceX + 10 * (distanceY - distanceX);
     }
-    
-    public List<Vector3> GetSmoothPath(List<GridNode> nodePath)
-    {
-        var waypoints = new List<Vector3>();
-        if (nodePath == null || nodePath.Count == 0)
-            return waypoints;
-
-        Vector3 previousDirection = Vector3.zero;
-        waypoints.Add(nodePath[0].worldPosition);
-
-        for (int i = 1; i < nodePath.Count; i++)
-        {
-            Vector3 direction = nodePath[i].worldPosition - nodePath[i - 1].worldPosition;
-            direction.y = 0;
-
-            if (direction != previousDirection)
-            {
-                waypoints.Add(nodePath[i].worldPosition);
-                previousDirection = direction;
-            }
-        }
-        if (waypoints[waypoints.Count - 1] != nodePath[nodePath.Count - 1].worldPosition)
-            waypoints.Add(nodePath[nodePath.Count - 1].worldPosition);
-
-        return waypoints;
-    }
 }
