@@ -67,6 +67,8 @@ public class NavGrid : MonoBehaviour
                 grid[x,y] = new GridNode(walkable, worldPoint, x, y);
             }
         }
+        
+        OnGridComplete?.Invoke();  // Fire GridComplete event
     }
 
     public GridNode NodeFromWorldPoint(Vector3 worldPosition)
