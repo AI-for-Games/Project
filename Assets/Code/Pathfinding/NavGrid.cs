@@ -43,7 +43,7 @@ public class NavGrid : MonoBehaviour
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridSize.x / nodeDiameter);
         gridSizeY = Mathf.RoundToInt(gridSize.y / nodeDiameter);
-        CreateGrid();
+        //CreateGrid();
     }
 
     void CreateGrid()
