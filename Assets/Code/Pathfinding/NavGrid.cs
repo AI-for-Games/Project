@@ -1,10 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Code.Generation;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class NavGrid : MonoBehaviour
 {
+    public static event Action OnGridComplete;  // Event that fires when generation is done
+    
     public LayerMask unwalkableMask;
     public Vector2 gridSize;
     public float nodeRadius = 0.5f;
@@ -12,6 +16,27 @@ public class NavGrid : MonoBehaviour
     GridNode[,] grid;
     float nodeDiameter;
     int gridSizeX, gridSizeY;
+    
+    void OnEnable()
+    {
+        DungeonGenerator.OnDungeonGenerated += BuildGrid;  // Sign up to dungeon generated event
+    }
+
+    void OnDisable()
+    {
+        DungeonGenerator.OnDungeonGenerated -= BuildGrid;
+    }
+
+    void BuildGrid()
+    {
+        StartCoroutine(BuildGridNextPhysicsFrame());
+    }
+
+    IEnumerator BuildGridNextPhysicsFrame()
+    {
+        yield return new WaitForFixedUpdate();  // Wait for physics to sync
+        CreateGrid();
+    }
 
     void Start()
     {
@@ -23,6 +48,8 @@ public class NavGrid : MonoBehaviour
 
     void CreateGrid()
     {
+        Debug.Log("CreateGrid called. Walls in scene: " + FindObjectsOfType<Collider>().Length);
+        
         grid = new GridNode[gridSizeX, gridSizeY];
         Vector3 worldBottomLeft = transform.position
                                   - Vector3.right * gridSize.x / 2

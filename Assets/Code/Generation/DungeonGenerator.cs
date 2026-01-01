@@ -116,6 +116,13 @@ namespace Code.Generation
             if ((existing.OpenSides & Directions.North) != 0 && InBounds(gridX, gridY + 1) &&  // If open and in bounds
                 !IsOccupied(gridX, gridY + 1))  // And cell is free (empty)
             {
+                // If adjacent cell is a room, force to a corridor
+                if (IsOccupied(gridX, gridY + 1) && _grid[gridX, gridY + 1].Original.category == PrefabCategory.Room)
+                {
+                    isRoom = false;
+                }
+                
+                //isRoom = (!IsOccupied(gridX, gridY + 1) || _grid[gridX, gridY + 1].Original.category == PrefabCategory.Room) && isRoom;  // If adjacent cell is a room, force to a corridor
                 SpawnCell(gridX, gridY + 1, FindValidPrefab(gridX, gridY + 1, isRoom));  // Spawn a new cell
                 SpawnAdjacent(gridX, gridY + 1, maxDepth, currentDepth + 1);  // Recurse into new cell
             }
@@ -124,6 +131,12 @@ namespace Code.Generation
             if ((existing.OpenSides & Directions.East) != 0 && InBounds(gridX + 1, gridY) &&
                 !IsOccupied(gridX + 1, gridY))
             {
+                // If adjacent cell is a room, force to a corridor
+                if (IsOccupied(gridX + 1, gridY) && _grid[gridX + 1, gridY].Original.category == PrefabCategory.Room)
+                {
+                    isRoom = false;
+                }
+                
                 SpawnCell(gridX + 1, gridY, FindValidPrefab(gridX + 1, gridY, isRoom));
                 SpawnAdjacent(gridX + 1, gridY, maxDepth, currentDepth + 1);
             }
@@ -132,6 +145,12 @@ namespace Code.Generation
             if ((existing.OpenSides & Directions.South) != 0 && InBounds(gridX, gridY - 1) &&
                 !IsOccupied(gridX, gridY - 1))
             {
+                // If adjacent cell is a room, force to a corridor
+                if (IsOccupied(gridX, gridY - 1) && _grid[gridX, gridY - 1].Original.category == PrefabCategory.Room)
+                {
+                    isRoom = false;
+                }
+                
                 SpawnCell(gridX, gridY - 1, FindValidPrefab(gridX, gridY - 1, isRoom));
                 SpawnAdjacent(gridX, gridY - 1, maxDepth, currentDepth + 1);
             }
@@ -140,6 +159,12 @@ namespace Code.Generation
             if ((existing.OpenSides & Directions.West) != 0 && InBounds(gridX - 1, gridY) &&
                 !IsOccupied(gridX - 1, gridY))
             {
+                // If adjacent cell is a room, force to a corridor
+                if (IsOccupied(gridX - 1, gridY) && _grid[gridX - 1, gridY].Original.category == PrefabCategory.Room)
+                {
+                    isRoom = false;
+                }
+                
                 SpawnCell(gridX - 1, gridY, FindValidPrefab(gridX - 1, gridY, isRoom));
                 SpawnAdjacent(gridX - 1, gridY, maxDepth, currentDepth + 1);
             }
