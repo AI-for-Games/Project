@@ -59,30 +59,45 @@ public class NavGrid : MonoBehaviour
             Mathf.FloorToInt(percentY * gridSizeY),
             0, gridSizeY - 1
         );
-
         return grid[x, y];
     }
 
-    public System.Collections.Generic.List<GridNode> GetNeighbours(GridNode node)
+    public List<GridNode> GetNeighbours(GridNode node)
     {
-        var neighbours = new System.Collections.Generic.List<GridNode>();
+        var neighbours = new List<GridNode>();
 
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
             {
-                if ( x == 0 && y == 0)
+                if (x == 0 && y == 0)
                     continue;
-                
+
                 int checkX = node.gridX + x;
                 int checkY = node.gridY + y;
 
-                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
+                if (checkX < 0 || checkX >= gridSizeX ||
+                    checkY < 0 || checkY >= gridSizeY)
+                    continue;
+
+                GridNode neighbour = grid[checkX, checkY];
+
+                if (!neighbour.walkable)
+                    continue;
+
+                if (Mathf.Abs(x) == 1 && Mathf.Abs(y) == 1)
                 {
-                    neighbours.Add(grid[checkX, checkY]);
+                    GridNode nodeX = grid[node.gridX + x, node.gridY];
+                    GridNode nodeY = grid[node.gridX, node.gridY + y];
+
+                    if (!nodeX.walkable || !nodeY.walkable)
+                        continue;
                 }
+
+                neighbours.Add(neighbour);
             }
         }
+
         return neighbours;
     }
     
