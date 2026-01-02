@@ -38,6 +38,10 @@ namespace Code.Generation
         public GameObject targetMesh;
         public bool setAgentTarget;
         public GameObject agentTarget;
+
+        [Header("Void")] 
+        public GameObject voidObject;
+        public float voidOffset;
         
         private List<CookedPrefab> _cookedPrefabs;  // Internally used prefabs (includes generated rotations)
         private List<CookedPrefab> _rooms;
@@ -360,6 +364,9 @@ namespace Code.Generation
                 for (var x = 0; x < gridWidth; x++)
                 {
                     SpawnCell(x, y);
+                    
+                    var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);
+                    Instantiate(voidObject, pos, Quaternion.identity);
                 }
             }
         }
