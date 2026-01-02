@@ -27,6 +27,7 @@ namespace Code.Generation
         public float roomChance = 0.6f;
         public float requiredRooms = 10;
         public float maxIterations = 100;
+        public float maxBranchLength = 200;
 
         [Header("Prefabs")]
         [Tooltip("All prefabs the generator can use (make sure PrefabData is set correctly!)")]
@@ -151,68 +152,78 @@ namespace Code.Generation
 
             SetCell(0, 0, FindValidPrefab(0, 0, true));  // Always spawn a room at 0,0 to start at
             
-            GenerateAdjacent(0, 0, 2000);  // Start recursive generation from the one we just spawned
+            GenerateNextCell(0, 0);  // Start recursive generation from the one we just spawned
         }
 
-        private void GenerateAdjacent(int gridX, int gridY, int maxDepth = 5, int currentDepth = 0)
+        private void GenerateNextCell(int gridX, int gridY, int currentDepth = 0)
         {
-            if (currentDepth >= maxDepth)
+            if (currentDepth >= maxBranchLength || !IsOccupied(gridX, gridY))  // Prevent infinite loops of recursion || Prevent crash from invalid data
                 return;
-
-            var existing = _grid[gridX, gridY];
-
-            // Corridors can spawn both types, rooms can only spawn corridors
-            var isRoom = existing.Original.category == PrefabCategory.Corridor && RandBool(roomChance);  // TODO: Check adjacent cells, if any are a room (that require a connection) then must be corridor, set while checking?
-
-            // If adjacent cell is a room, force to a corridor
-            if (IsOccupied(gridX, gridY + 1) && _grid[gridX, gridY + 1].Original.category == PrefabCategory.Room)
-            {
-                isRoom = false;
-            }
-            if (IsOccupied(gridX + 1, gridY) && _grid[gridX + 1, gridY].Original.category == PrefabCategory.Room)
-            {
-                isRoom = false;
-            }
-            if (IsOccupied(gridX, gridY - 1) && _grid[gridX, gridY - 1].Original.category == PrefabCategory.Room)
-            {
-                isRoom = false;
-            }
-            if (IsOccupied(gridX - 1, gridY) && _grid[gridX - 1, gridY].Original.category == PrefabCategory.Room)
-            {
-                isRoom = false;
-            }
             
             // North cell
-            if ((existing.OpenSides & Directions.North) != 0 && InBounds(gridX, gridY + 1) &&  // If open and in bounds
-                !IsOccupied(gridX, gridY + 1))  // And cell is free (empty)
+            if (TryGenerateCell(gridX, gridY, Directions.North))  // If new cell was made
             {
-                SetCell(gridX, gridY + 1, FindValidPrefab(gridX, gridY + 1, isRoom));  // Spawn a new cell
-                GenerateAdjacent(gridX, gridY + 1, maxDepth, currentDepth + 1);  // Recurse into new cell
+                GenerateNextCell(gridX, gridY + 1, currentDepth + 1);  // Continue generating from new (move north)
             }
-
+            
             // East cell
-            if ((existing.OpenSides & Directions.East) != 0 && InBounds(gridX + 1, gridY) &&
-                !IsOccupied(gridX + 1, gridY))
+            if (TryGenerateCell(gridX, gridY, Directions.East))
             {
-                SetCell(gridX + 1, gridY, FindValidPrefab(gridX + 1, gridY, isRoom));
-                GenerateAdjacent(gridX + 1, gridY, maxDepth, currentDepth + 1);
+                GenerateNextCell(gridX + 1, gridY, currentDepth + 1);
             }
-
+            
             // South cell
-            if ((existing.OpenSides & Directions.South) != 0 && InBounds(gridX, gridY - 1) &&
-                !IsOccupied(gridX, gridY - 1))
+            if (TryGenerateCell(gridX, gridY, Directions.South))
             {
-                SetCell(gridX, gridY - 1, FindValidPrefab(gridX, gridY - 1, isRoom));
-                GenerateAdjacent(gridX, gridY - 1, maxDepth, currentDepth + 1);
+                GenerateNextCell(gridX, gridY - 1, currentDepth + 1);
+            }
+            
+            // West cell
+            if (TryGenerateCell(gridX, gridY, Directions.West))
+            {
+                GenerateNextCell(gridX - 1, gridY, currentDepth + 1);
+            }
+        }
+
+        private bool TryGenerateCell(int gridX, int gridY, Directions branchDirection)
+        {
+            var currCell = _grid[gridX, gridY];  // Safe to assume current cell is valid
+            var nextCellPos = new Vector2Int();
+            switch (branchDirection)
+            {
+                case Directions.North:
+                    nextCellPos.x = gridX;
+                    nextCellPos.y = gridY + 1;
+                    break;
+                case Directions.East:
+                    nextCellPos.x = gridX + 1;
+                    nextCellPos.y = gridY;
+                    break;
+                case Directions.South:
+                    nextCellPos.x = gridX;
+                    nextCellPos.y = gridY - 1;
+                    break;
+                case Directions.West:
+                    nextCellPos.x = gridX - 1;
+                    nextCellPos.y = gridY;
+                    break;
+                case Directions.None:
+                default:
+                    return false;
             }
 
-            // West cell
-            if ((existing.OpenSides & Directions.West) != 0 && InBounds(gridX - 1, gridY) &&
-                !IsOccupied(gridX - 1, gridY))
+            // If the current cell is a room, force a corridor, otherwise allow chance of a room spawning but NOT if connecting to a room
+            var forceCorridor = IsNextToRoom(nextCellPos.x, nextCellPos.y) || currCell.Original.category == PrefabCategory.Corridor && RandBool(roomChance);
+            
+            // If the current cell can continue the branch AND will be within the grid AND is free...
+            if ((currCell.OpenSides & branchDirection) == branchDirection && InBounds(nextCellPos.x, nextCellPos.y) && !IsOccupied(nextCellPos.x, nextCellPos.y))
             {
-                SetCell(gridX - 1, gridY, FindValidPrefab(gridX - 1, gridY, isRoom));
-                GenerateAdjacent(gridX - 1, gridY, maxDepth, currentDepth + 1);
+                // Generate a valid fab and set the next cell in the grid
+                SetCell(nextCellPos.x, nextCellPos.y, FindValidPrefab(nextCellPos.x, nextCellPos.y, !forceCorridor));
+                return true;
             }
+
+            return false;
         }
 
         private CookedPrefab FindValidPrefab(int gridX, int gridY, bool isRoom)
@@ -249,11 +260,9 @@ namespace Code.Generation
 
             if (validOptions.Count != 0) return GetWeightedRandom(validOptions);
             
-            // Log reports if there wasn't a valid fab at all.
 #if UNITY_EDITOR
+            // Log reports if there wasn't a valid fab at all.
             Debug.LogWarning($"FALLBACK @ {gridX}, {gridY}");
-#else
-            Debug.LogWarning($"No valid prefabs found at ({gridX}, {gridY})");
 #endif
             return _rooms[0];  // Fallback to prevent crash or empty cells (won't be right!)
         }
@@ -288,8 +297,7 @@ namespace Code.Generation
 
             return required;
         }
-
-
+        
         private Directions GetBlockedDirections(int gridX, int gridY)
         {
             var blocked = Directions.None;
@@ -366,6 +374,24 @@ namespace Code.Generation
         {
             return InBounds(x, y) && _grid[x, y].Original != null;
         }
+
+        private bool IsNextToRoom(int x, int y)
+        {
+            // North - If the cell is occupied, connects to the one we are checking and is a room, return true
+            if (IsOccupied(x, y + 1) && (_grid[x, y + 1].OpenSides & Directions.South) == Directions.South && _grid[x, y + 1].Original.category == PrefabCategory.Room)
+                return true;
+            
+            // East
+            if (IsOccupied(x + 1, y) && (_grid[x + 1, y].OpenSides & Directions.West) == Directions.West && _grid[x + 1, y].Original.category == PrefabCategory.Room)
+                return true;
+            
+            // South
+            if (IsOccupied(x, y - 1) && (_grid[x, y - 1].OpenSides & Directions.North) == Directions.North && _grid[x, y - 1].Original.category == PrefabCategory.Room)
+                return true;
+
+            // West
+            return IsOccupied(x - 1, y) && (_grid[x - 1, y].OpenSides & Directions.East) == Directions.East && _grid[x - 1, y].Original.category == PrefabCategory.Room;
+        }
         
         private bool IsValidPrefab(int gridX, int gridY, CookedPrefab prefab)
         {
@@ -426,7 +452,7 @@ namespace Code.Generation
 
         private static bool AvoidsBlockedDir(Directions prefabDirections, Directions blockedDirections)
         {
-            return (prefabDirections & blockedDirections) == Directions.None;
+            return (prefabDirections & blockedDirections) == Directions.None;  // Prefab matches NONE of blocked dirs
         }
         
         private static CookedPrefab GetWeightedRandom(params List<CookedPrefab>[] lists)

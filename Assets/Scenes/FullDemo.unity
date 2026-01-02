@@ -372,8 +372,9 @@ MonoBehaviour:
   gridHeight: 10
   cellSize: 20
   roomChance: 0.6
-  requiredRooms: 10
+  requiredRooms: 20
   maxIterations: 100
+  maxBranchLength: 200
   prefabs:
   - {fileID: 4901280172326512471, guid: 0d4eef0ee26dc5c46bd3112947fd3d65, type: 3}
   - {fileID: 4196189381377484779, guid: 266c2ac4d92323045bca7c07b8993951, type: 3}
