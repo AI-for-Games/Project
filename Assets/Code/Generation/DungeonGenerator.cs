@@ -18,24 +18,75 @@ namespace Code.Generation
     {
         public static event Action OnDungeonGenerated;  // Event that fires when generation is done
         
+        [Header("Grid system")]
         public int gridWidth = 20;
         public int gridHeight = 20;
         public float cellSize = 20f;
+        
+        [Header("Generation")]
         public float roomChance = 0.6f;
+        public float requiredRooms = 10;
+        public float maxIterations = 100;
 
+        [Header("Prefabs")]
         [Tooltip("All prefabs the generator can use (make sure PrefabData is set correctly!)")]
         public List<PrefabData> prefabs;  // Source prefabs (not directly spawned, used to cook)
+
+        [Header("Pathfinding")]
+        public bool spawnTarget;
+        public GameObject targetMesh;
+        public bool setAgentTarget;
+        public GameObject agentTarget;
         
         private List<CookedPrefab> _cookedPrefabs;  // Internally used prefabs (includes generated rotations)
         private List<CookedPrefab> _rooms;
         private List<CookedPrefab> _corridors;
         
         private CookedPrefab[,] _grid;
+        private int _roomCount;
+        private int _generateCount;
 
         private void Start()
         {
             LoadPrefabs();
-            Generate();
+            
+#if UNITY_EDITOR
+            Debug.Log("Started dungeon generation...");
+#endif
+
+            _generateCount = 0;
+            while (_roomCount < requiredRooms && _generateCount <= maxIterations)  // Run generation until we meet room requirements
+            {
+                Generate();
+            }
+            
+#if UNITY_EDITOR
+            if (_generateCount >= maxIterations)
+            {
+                Debug.LogWarning($"Failed to find valid dungeon with >{requiredRooms} rooms! (max iterations: {maxIterations} | fallbackRoomCount: {_roomCount})");
+            }
+            else
+            {
+                Debug.Log($"Generated valid dungeon with {_roomCount} rooms! (took {_generateCount} iterations | {_roomCount} generated > {requiredRooms} requested)");
+            }
+#endif
+
+            if (targetMesh != null && spawnTarget)  // Pathfinding target spawn
+            {
+                var roomPos = FindFarthestRoom();
+                var prefab = _grid[roomPos.x, roomPos.y];
+                var rot = Quaternion.Euler(0, prefab.Rotation, 0);
+                var pos = transform.position + new Vector3(roomPos.x * cellSize, 0, roomPos.y * cellSize);
+                Instantiate(targetMesh, pos, rot);  // Spawn the target object
+                
+                if (agentTarget != null && setAgentTarget)
+                {
+                    agentTarget.transform.position = pos;
+                }
+            }
+
+            SpawnGenerated();
+            
             OnDungeonGenerated?.Invoke();  // Trigger finished generation event
         }
 
@@ -95,14 +146,15 @@ namespace Code.Generation
         private void Generate()
         {
             _grid = new CookedPrefab[gridWidth, gridHeight]; // Create blank 2D array
+            _roomCount = 0;  // Reset count
+            _generateCount++;  // Count how many iterations it takes to create a dungeon
 
-            SpawnCell(0, 0, FindValidPrefab(0, 0, true));  // Spawn a room at 0,0 to start at
-            SpawnCell(gridWidth - 1, gridHeight - 1, FindValidPrefab(gridWidth - 1, gridHeight - 1, true));
+            SetCell(0, 0, FindValidPrefab(0, 0, true));  // Always spawn a room at 0,0 to start at
             
-            SpawnAdjacent(0, 0, 2000);
+            GenerateAdjacent(0, 0, 2000);  // Start recursive generation from the one we just spawned
         }
 
-        private void SpawnAdjacent(int gridX, int gridY, int maxDepth = 5, int currentDepth = 0)
+        private void GenerateAdjacent(int gridX, int gridY, int maxDepth = 5, int currentDepth = 0)
         {
             if (currentDepth >= maxDepth)
                 return;
@@ -112,61 +164,54 @@ namespace Code.Generation
             // Corridors can spawn both types, rooms can only spawn corridors
             var isRoom = existing.Original.category == PrefabCategory.Corridor && RandBool(roomChance);  // TODO: Check adjacent cells, if any are a room (that require a connection) then must be corridor, set while checking?
 
+            // If adjacent cell is a room, force to a corridor
+            if (IsOccupied(gridX, gridY + 1) && _grid[gridX, gridY + 1].Original.category == PrefabCategory.Room)
+            {
+                isRoom = false;
+            }
+            if (IsOccupied(gridX + 1, gridY) && _grid[gridX + 1, gridY].Original.category == PrefabCategory.Room)
+            {
+                isRoom = false;
+            }
+            if (IsOccupied(gridX, gridY - 1) && _grid[gridX, gridY - 1].Original.category == PrefabCategory.Room)
+            {
+                isRoom = false;
+            }
+            if (IsOccupied(gridX - 1, gridY) && _grid[gridX - 1, gridY].Original.category == PrefabCategory.Room)
+            {
+                isRoom = false;
+            }
+            
             // North cell
             if ((existing.OpenSides & Directions.North) != 0 && InBounds(gridX, gridY + 1) &&  // If open and in bounds
                 !IsOccupied(gridX, gridY + 1))  // And cell is free (empty)
             {
-                // If adjacent cell is a room, force to a corridor
-                if (IsOccupied(gridX, gridY + 1) && _grid[gridX, gridY + 1].Original.category == PrefabCategory.Room)
-                {
-                    isRoom = false;
-                }
-                
-                //isRoom = (!IsOccupied(gridX, gridY + 1) || _grid[gridX, gridY + 1].Original.category == PrefabCategory.Room) && isRoom;  // If adjacent cell is a room, force to a corridor
-                SpawnCell(gridX, gridY + 1, FindValidPrefab(gridX, gridY + 1, isRoom));  // Spawn a new cell
-                SpawnAdjacent(gridX, gridY + 1, maxDepth, currentDepth + 1);  // Recurse into new cell
+                SetCell(gridX, gridY + 1, FindValidPrefab(gridX, gridY + 1, isRoom));  // Spawn a new cell
+                GenerateAdjacent(gridX, gridY + 1, maxDepth, currentDepth + 1);  // Recurse into new cell
             }
 
             // East cell
             if ((existing.OpenSides & Directions.East) != 0 && InBounds(gridX + 1, gridY) &&
                 !IsOccupied(gridX + 1, gridY))
             {
-                // If adjacent cell is a room, force to a corridor
-                if (IsOccupied(gridX + 1, gridY) && _grid[gridX + 1, gridY].Original.category == PrefabCategory.Room)
-                {
-                    isRoom = false;
-                }
-                
-                SpawnCell(gridX + 1, gridY, FindValidPrefab(gridX + 1, gridY, isRoom));
-                SpawnAdjacent(gridX + 1, gridY, maxDepth, currentDepth + 1);
+                SetCell(gridX + 1, gridY, FindValidPrefab(gridX + 1, gridY, isRoom));
+                GenerateAdjacent(gridX + 1, gridY, maxDepth, currentDepth + 1);
             }
 
             // South cell
             if ((existing.OpenSides & Directions.South) != 0 && InBounds(gridX, gridY - 1) &&
                 !IsOccupied(gridX, gridY - 1))
             {
-                // If adjacent cell is a room, force to a corridor
-                if (IsOccupied(gridX, gridY - 1) && _grid[gridX, gridY - 1].Original.category == PrefabCategory.Room)
-                {
-                    isRoom = false;
-                }
-                
-                SpawnCell(gridX, gridY - 1, FindValidPrefab(gridX, gridY - 1, isRoom));
-                SpawnAdjacent(gridX, gridY - 1, maxDepth, currentDepth + 1);
+                SetCell(gridX, gridY - 1, FindValidPrefab(gridX, gridY - 1, isRoom));
+                GenerateAdjacent(gridX, gridY - 1, maxDepth, currentDepth + 1);
             }
 
             // West cell
             if ((existing.OpenSides & Directions.West) != 0 && InBounds(gridX - 1, gridY) &&
                 !IsOccupied(gridX - 1, gridY))
             {
-                // If adjacent cell is a room, force to a corridor
-                if (IsOccupied(gridX - 1, gridY) && _grid[gridX - 1, gridY].Original.category == PrefabCategory.Room)
-                {
-                    isRoom = false;
-                }
-                
-                SpawnCell(gridX - 1, gridY, FindValidPrefab(gridX - 1, gridY, isRoom));
-                SpawnAdjacent(gridX - 1, gridY, maxDepth, currentDepth + 1);
+                SetCell(gridX - 1, gridY, FindValidPrefab(gridX - 1, gridY, isRoom));
+                GenerateAdjacent(gridX - 1, gridY, maxDepth, currentDepth + 1);
             }
         }
 
@@ -179,22 +224,26 @@ namespace Code.Generation
             {
                 if (IsValidPrefab(gridX, gridY, p))  // If the fab is valid, add to pool
                 {
-                    Debug.Log(
-                        $"ACCEPTED @ {gridX}, {gridY} | " +
-                        $"Required={GetRequiredDirections(gridX, gridY)} | " +
-                        $"Blocked={GetBlockedDirections(gridX, gridY)} | " +
-                        $"Sides={p.OpenSides}"
-                    );
+#if UNITY_EDITOR
+                    //Debug.Log(
+                    //    $"ACCEPTED @ {gridX}, {gridY} | " +
+                    //    $"Required={GetRequiredDirections(gridX, gridY)} | " +
+                    //    $"Blocked={GetBlockedDirections(gridX, gridY)} | " +
+                    //    $"Sides={p.OpenSides}"
+                    //);
+#endif
                     validOptions.Add(p);
                 }
                 else
                 {
-                    Debug.Log(
-                        $"REJECTED @ {gridX}, {gridY} | " +
-                        $"Required={GetRequiredDirections(gridX, gridY)} | " +
-                        $"Blocked={GetBlockedDirections(gridX, gridY)} | " +
-                        $"Sides={p.OpenSides}"
-                    );
+#if UNITY_EDITOR
+                    //Debug.Log(
+                    //    $"REJECTED @ {gridX}, {gridY} | " +
+                    //    $"Required={GetRequiredDirections(gridX, gridY)} | " +
+                    //    $"Blocked={GetBlockedDirections(gridX, gridY)} | " +
+                    //    $"Sides={p.OpenSides}"
+                    //);
+#endif
                 }
             }
 
@@ -275,14 +324,36 @@ namespace Code.Generation
 
             return blocked;
         }
-
-        private void SpawnCell(int gridX, int gridY, CookedPrefab prefab)
+        
+        private void SetCell(int gridX, int gridY, CookedPrefab prefab)
         {
+            _grid[gridX, gridY] = prefab;
+            
+            if (prefab.Original.category == PrefabCategory.Room)
+                _roomCount++;
+        }
+
+        private void SpawnCell(int gridX, int gridY)
+        {
+            if (!IsOccupied(gridX, gridY))  // Dont spawn empty cells
+                return;
+            
+            var prefab = _grid[gridX, gridY];  // Cell is valid and can be spawned
             var rot = Quaternion.Euler(0, prefab.Rotation, 0);
             var pos = transform.position + new Vector3(gridX * cellSize, 0, gridY * cellSize);
-            
-            _grid[gridX, gridY] = prefab;
+
             Instantiate(prefab.Original, pos, rot);
+        }
+
+        private void SpawnGenerated()
+        {
+            for (var y = 0; y < gridHeight; y++)  // Spawn every cell in the grid that's generated
+            {
+                for (var x = 0; x < gridWidth; x++)
+                {
+                    SpawnCell(x, y);
+                }
+            }
         }
 
         private bool InBounds(int x, int y)
@@ -313,6 +384,22 @@ namespace Code.Generation
                 query = query.Where(p => types.Contains(p.Original.type));
             
             return query.ToList();
+        }
+
+        private Vector2Int FindFarthestRoom()
+        {
+            for (var y = gridHeight - 1; y >= 0; y--)
+            {
+                for (var x = gridWidth - 1; x >= 0; x--)
+                {
+                    if (IsOccupied(x, y) && _grid[x, y].Original.category == PrefabCategory.Room)
+                    {
+                        return new Vector2Int(x, y);
+                    }
+                }
+            }
+            
+            return Vector2Int.zero;
         }
         
         private static bool RandBool(float trueWeight)
