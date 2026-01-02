@@ -12,8 +12,6 @@ GameObject:
   - component: {fileID: 5186232654641632773}
   - component: {fileID: 5690827722127978845}
   - component: {fileID: 8722792318459012735}
-  - component: {fileID: 8517474126015371989}
-  - component: {fileID: 362824659370504026}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -109,51 +107,6 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8517474126015371989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 74054236969516938}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3de7611852906b0478510cd01d945cea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 6
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 128
-  bulletPrefab: {fileID: 8859634770506273252, guid: 2acd6e01d8d74714cbd600e89d11d288, type: 3}
-  firePoint: {fileID: 2573932374157141961}
-  fireRate: 0.2
---- !u!143 &362824659370504026
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 74054236969516938}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.5
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &580187464343515261
 GameObject:
@@ -271,6 +224,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4221594549930439831}
+  - component: {fileID: 313768591526122774}
+  - component: {fileID: 6721327274669925143}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -293,8 +248,53 @@ Transform:
   - {fileID: 6548593733480807248}
   - {fileID: 2522850758131953955}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &313768591526122774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1788812994674042180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3de7611852906b0478510cd01d945cea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 6
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 128
+  bulletPrefab: {fileID: 8859634770506273252, guid: 2acd6e01d8d74714cbd600e89d11d288, type: 3}
+  firePoint: {fileID: 2573932374157141961}
+  fireRate: 0.2
+--- !u!143 &6721327274669925143
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1788812994674042180}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3335044583253126862
 GameObject:
   m_ObjectHideFlags: 0

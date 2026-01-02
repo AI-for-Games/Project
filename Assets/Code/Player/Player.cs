@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TopDownPlayer : MonoBehaviour
+public class Player : MonoBehaviour
 {
     public float speed = 6f;
     public LayerMask groundMask;

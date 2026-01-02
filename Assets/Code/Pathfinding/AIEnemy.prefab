@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2750637998059868413}
   - component: {fileID: 3588535356590077838}
   - component: {fileID: 2181315951300192065}
+  - component: {fileID: -1109354713873592346}
   m_Layer: 0
   m_Name: AIEnemy
   m_TagString: Untagged
@@ -122,3 +123,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   speed: 10
+--- !u!114 &-1109354713873592346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2122198314076755578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d9644ca030c5cd4196a23ba93e96eaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 3
+  currentHealth: 3
