@@ -111,4 +111,4 @@ MonoBehaviour:
   - 1
   spawnOnAwake: 1
   previewInEditor: 1
-  previewIndex: -1
+  previewIndex: 0
