@@ -332,7 +332,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1066925273}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -383,15 +383,26 @@ MonoBehaviour:
   - {fileID: 8375649377826868681, guid: ebeec060c976cc44eb50ef16495ef618, type: 3}
   - {fileID: 8375649377826868681, guid: 3e450e137a598014ea518ad84f608c7a, type: 3}
   - {fileID: 8375649377826868681, guid: 8692ac265b2afb746b1cfd17b55bfcaf, type: 3}
+  - {fileID: 8375649377826868681, guid: 0739876d192b15b4d983d4b83af4c072, type: 3}
   - {fileID: 7028860705964857599, guid: e30691ebdf80a9b45a8e99b3973b438f, type: 3}
+  - {fileID: 7028860705964857599, guid: 35f246da2996a14499cd0058a08ffb5d, type: 3}
   - {fileID: 8192441639194449984, guid: 46da11ddb90bdd5438cbc47699fccc95, type: 3}
+  - {fileID: 8192441639194449984, guid: c72c257a472798b40b052294fae1d5ab, type: 3}
   - {fileID: 5191843416875759565, guid: a709d8eced07c8e46b50ef5a747a0199, type: 3}
+  - {fileID: 5191843416875759565, guid: ddf9d490a5c71d349bd22e47c044fb99, type: 3}
+  - {fileID: 5191843416875759565, guid: 01733516d32519142a9a9159af92439e, type: 3}
   - {fileID: 5191843416875759565, guid: 81fcef46ff82f964ea2a12a7deab0af8, type: 3}
+  - {fileID: 5191843416875759565, guid: ef1df827031e1654aaa9a309bac94e3e, type: 3}
   - {fileID: 7028860705964857599, guid: 4079920a0ca7f64488e8c61a317a910f, type: 3}
   spawnTarget: 1
-  targetMesh: {fileID: 919132149155446097, guid: e72ce65559d2cf54382fda1844f53365, type: 3}
+  targetPrefab: {fileID: 919132149155446097, guid: e72ce65559d2cf54382fda1844f53365, type: 3}
   setAgentTarget: 1
   agentTarget: {fileID: 1705192898}
+  spawnEnemiesOnEnds: 0
+  enemyPrefab: {fileID: 0}
+  enemySpawnDelay: 3
+  enemySpawnRate: 5
+  enemyTarget: {fileID: 0}
   voidObject: {fileID: 4339956708527045930, guid: 92df7001b28067841940920dbc4ec102, type: 3}
   voidOffset: -20
 --- !u!4 &1410463658

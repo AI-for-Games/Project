@@ -616,7 +616,10 @@ MonoBehaviour:
   - {fileID: 8192441639194449984, guid: 46da11ddb90bdd5438cbc47699fccc95, type: 3}
   - {fileID: 8192441639194449984, guid: c72c257a472798b40b052294fae1d5ab, type: 3}
   - {fileID: 5191843416875759565, guid: a709d8eced07c8e46b50ef5a747a0199, type: 3}
+  - {fileID: 5191843416875759565, guid: ddf9d490a5c71d349bd22e47c044fb99, type: 3}
+  - {fileID: 5191843416875759565, guid: 01733516d32519142a9a9159af92439e, type: 3}
   - {fileID: 5191843416875759565, guid: 81fcef46ff82f964ea2a12a7deab0af8, type: 3}
+  - {fileID: 5191843416875759565, guid: ef1df827031e1654aaa9a309bac94e3e, type: 3}
   - {fileID: 7028860705964857599, guid: 4079920a0ca7f64488e8c61a317a910f, type: 3}
   spawnTarget: 1
   targetPrefab: {fileID: 919132149155446097, guid: e72ce65559d2cf54382fda1844f53365, type: 3}
