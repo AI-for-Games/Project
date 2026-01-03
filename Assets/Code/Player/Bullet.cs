@@ -17,6 +17,12 @@ public class Bullet : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        Health health = collision.collider.GetComponent<Health>();
+        if (health != null)
+        {
+            health.TakeDamage(1);
+        }
+
         Destroy(gameObject);
     }
 }
