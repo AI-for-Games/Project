@@ -10,6 +10,11 @@ public class AIMovement : MonoBehaviour
     List<GridNode> path;
     int pathIndex;
 
+    public void Init(Transform movementTarget)
+    {
+        target = movementTarget;
+    }
+
     void Start()
     {
         pathfinding = FindObjectOfType<Pathfinding>();
