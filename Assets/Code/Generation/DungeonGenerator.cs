@@ -46,6 +46,7 @@ namespace Code.Generation
         public GameObject enemyPrefab;
         public float enemySpawnDelay = 3;
         public float enemySpawnRate = 5;
+        public float enemySpawnHeight = 1;
         public Transform enemyTarget;
 
         [Header("Void")] 
@@ -384,7 +385,7 @@ namespace Code.Generation
                 {
                     SpawnCell(x, y);
                     
-                    var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);
+                    var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);  // Spawn void below cells
                     Instantiate(voidObject, pos, Quaternion.identity);
                 }
             }
@@ -398,11 +399,15 @@ namespace Code.Generation
             InvokeRepeating(nameof(SpawnEnemy), enemySpawnDelay, enemySpawnRate);
         }
 
-        private void SpawnEnemy()
+        private void SpawnEnemy()  // Spawn enemy
         {
-            var pos = _validEnemySpawns[Random.Range(0, _validEnemySpawns.Count)];
+            var spawnPos = _validEnemySpawns[Random.Range(0, _validEnemySpawns.Count)];
+            var pos = transform.position;
+            pos.x += (spawnPos.x * cellSize);
+            pos.y += enemySpawnHeight;  // Offset Y position (otherwise will spawn in ground)
+            pos.z += (spawnPos.y * cellSize);
             //var prefab = _grid[pos.x, pos.y];  // Safe to assume valid (happens after generation)
-            var enemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+            var enemy = Instantiate(enemyPrefab, pos, Quaternion.identity);
             enemy.GetComponent<AIMovement>().Init(enemyTarget);
         }
 
