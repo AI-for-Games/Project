@@ -12,7 +12,7 @@ public class AIMovement : MonoBehaviour
 
     public void Init(Transform movementTarget)
     {
-        target = movementTarget;
+        target = movementTarget.transform;
     }
 
     void Start()
