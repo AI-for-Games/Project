@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -35,9 +36,15 @@ namespace Code.Generation
 
         [Header("Pathfinding")]
         public bool spawnTarget;
-        public GameObject targetMesh;
+        public GameObject targetPrefab;
         public bool setAgentTarget;
         public GameObject agentTarget;
+        
+        [Header("Enemies")]
+        public bool spawnEnemiesOnEnds = false;
+        public GameObject enemySpawnerPrefab;
+        public float enemySpawnRate = 10;
+        public Transform enemyTarget;
 
         [Header("Void")] 
         public GameObject voidObject;
@@ -76,17 +83,33 @@ namespace Code.Generation
             }
 #endif
 
-            if (targetMesh != null && spawnTarget)  // Pathfinding target spawn
+            if (targetPrefab != null && spawnTarget)  // Pathfinding target spawn
             {
                 var roomPos = FindFarthestRoom();
                 var prefab = _grid[roomPos.x, roomPos.y];
                 var rot = Quaternion.Euler(0, prefab.Rotation, 0);
                 var pos = transform.position + new Vector3(roomPos.x * cellSize, 0, roomPos.y * cellSize);
-                Instantiate(targetMesh, pos, rot);  // Spawn the target object
+                Instantiate(targetPrefab, pos, rot);  // Spawn the target object
                 
                 if (agentTarget != null && setAgentTarget)
                 {
                     agentTarget.transform.position = pos;
+                }
+            }
+
+            if (spawnEnemiesOnEnds)  // Enemy spawners spawning
+            {
+                for (var y = 0; y >= gridHeight; y++)
+                {
+                    for (var x = 0; x >= gridWidth; x++)
+                    {
+                        if (IsOccupied(x, y) && _grid[x, y].Original.type == PrefabType.End)
+                        {
+                            var pos = transform.position + new Vector3(x * cellSize, 0, y * cellSize);
+                            var enemySpawner = Instantiate(enemySpawnerPrefab, pos, Quaternion.identity);
+                            enemySpawner.GetComponent<EnemySpawner>().Init(enemySpawnRate, enemyTarget);
+                        }
+                    }
                 }
             }
 
