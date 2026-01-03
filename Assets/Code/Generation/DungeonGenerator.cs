@@ -401,7 +401,7 @@ namespace Code.Generation
         private void SpawnEnemy()
         {
             var pos = _validEnemySpawns[Random.Range(0, _validEnemySpawns.Count)];
-            var prefab = _grid[pos.x, pos.y];  // Safe to assume valid (happens after generation)
+            //var prefab = _grid[pos.x, pos.y];  // Safe to assume valid (happens after generation)
             var enemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
             enemy.GetComponent<AIMovement>().Init(enemyTarget);
         }

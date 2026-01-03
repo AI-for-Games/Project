@@ -26,7 +26,7 @@ namespace Code.Generation
         private void SpawnEnemy()
         {
             var enemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
-            enemy.GetComponent<AIMovement>().Init(enemyTarget);
+            //enemy.GetComponent<AIMovement>().Init(enemyTarget);
         }
         
         private void OnDrawGizmos()
