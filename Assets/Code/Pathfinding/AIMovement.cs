@@ -18,7 +18,7 @@ public class AIMovement : MonoBehaviour
     void Start()
     {
         pathfinding = FindObjectOfType<Pathfinding>();
-        InvokeRepeating(nameof(UpdatePath), 0f, 0.5f);
+        InvokeRepeating(nameof(UpdatePath), 0f, 0.1f);
     }
 
     void UpdatePath()
