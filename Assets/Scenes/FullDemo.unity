@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -339,7 +339,7 @@ PrefabInstance:
     - target: {fileID: 3612807567437892517, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: target
       value: 
-      objectReference: {fileID: 1629354294}
+      objectReference: {fileID: 0}
     - target: {fileID: 4221594549930439831, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -437,8 +437,11 @@ MonoBehaviour:
   - {fileID: 8375649377826868681, guid: ebeec060c976cc44eb50ef16495ef618, type: 3}
   - {fileID: 8375649377826868681, guid: 3e450e137a598014ea518ad84f608c7a, type: 3}
   - {fileID: 8375649377826868681, guid: 8692ac265b2afb746b1cfd17b55bfcaf, type: 3}
+  - {fileID: 8375649377826868681, guid: 0739876d192b15b4d983d4b83af4c072, type: 3}
   - {fileID: 7028860705964857599, guid: e30691ebdf80a9b45a8e99b3973b438f, type: 3}
+  - {fileID: 7028860705964857599, guid: 35f246da2996a14499cd0058a08ffb5d, type: 3}
   - {fileID: 8192441639194449984, guid: 46da11ddb90bdd5438cbc47699fccc95, type: 3}
+  - {fileID: 8192441639194449984, guid: c72c257a472798b40b052294fae1d5ab, type: 3}
   - {fileID: 5191843416875759565, guid: a709d8eced07c8e46b50ef5a747a0199, type: 3}
   - {fileID: 5191843416875759565, guid: 81fcef46ff82f964ea2a12a7deab0af8, type: 3}
   - {fileID: 7028860705964857599, guid: 4079920a0ca7f64488e8c61a317a910f, type: 3}
@@ -467,11 +470,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &1629354294 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4221594549930439831, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
-  m_PrefabInstance: {fileID: 1249187397}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1705192898
 GameObject:
   m_ObjectHideFlags: 0
