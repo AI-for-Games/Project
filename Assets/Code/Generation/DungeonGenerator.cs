@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -41,20 +42,22 @@ namespace Code.Generation
         public GameObject agentTarget;
         
         [Header("Enemies")]
-        public bool spawnEnemiesOnEnds = false;
-        public GameObject enemySpawnerPrefab;
+        public bool spawnEnemiesOnEnds;
         public GameObject enemyPrefab;
-        public float enemySpawnRate = 10;
+        public float enemySpawnDelay = 3;
+        public float enemySpawnRate = 5;
         public Transform enemyTarget;
 
         [Header("Void")] 
         public GameObject voidObject;
+
         public float voidOffset;
-        
+
         private List<CookedPrefab> _cookedPrefabs;  // Internally used prefabs (includes generated rotations)
         private List<CookedPrefab> _rooms;
         private List<CookedPrefab> _corridors;
-        
+        private List<Vector2Int> _validEnemySpawns;
+
         private CookedPrefab[,] _grid;
         private int _roomCount;
         private int _generateCount;
@@ -99,6 +102,8 @@ namespace Code.Generation
             }
             
             SpawnGenerated();
+
+            StartSpawningEnemies();
             
             OnDungeonGenerated?.Invoke();  // Trigger finished generation event
         }
@@ -108,6 +113,7 @@ namespace Code.Generation
             _cookedPrefabs = new List<CookedPrefab>();  // Clear any previously generated prefabs
             _rooms = new List<CookedPrefab>();
             _corridors = new List<CookedPrefab>();
+            _validEnemySpawns = new List<Vector2Int>();
             
             foreach (var prefab in prefabs)
             {
@@ -351,6 +357,11 @@ namespace Code.Generation
             
             if (prefab.Original.category == PrefabCategory.Room)
                 _roomCount++;
+            
+            if (spawnEnemiesOnEnds && prefab.Original.type == PrefabType.End && prefab.Original.category == PrefabCategory.Corridor)  // Enemy spawners spawning
+            {
+                _validEnemySpawns.Add(new Vector2Int(gridX, gridY));
+            }
         }
 
         private void SpawnCell(int gridX, int gridY)
@@ -375,15 +386,24 @@ namespace Code.Generation
                     
                     var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);
                     Instantiate(voidObject, pos, Quaternion.identity);
-                    
-                    if (spawnEnemiesOnEnds && IsOccupied(x, y) && _grid[x, y].Original.type == PrefabType.End && _grid[x, y].Original.category == PrefabCategory.Corridor)  // Enemy spawners spawning
-                    {
-                        pos.y = 1;
-                        var enemySpawner = Instantiate(enemySpawnerPrefab, pos, Quaternion.identity);
-                        enemySpawner.GetComponent<EnemySpawner>().Init(enemyPrefab, enemySpawnRate, enemyTarget);
-                    }
                 }
             }
+        }
+
+        private void StartSpawningEnemies()
+        {
+            if (!spawnEnemiesOnEnds)
+                return;
+            
+            InvokeRepeating(nameof(SpawnEnemy), enemySpawnDelay, enemySpawnRate);
+        }
+
+        private void SpawnEnemy()
+        {
+            var pos = _validEnemySpawns[Random.Range(0, _validEnemySpawns.Count)];
+            var prefab = _grid[pos.x, pos.y];  // Safe to assume valid (happens after generation)
+            var enemy = Instantiate(enemyPrefab, transform.position, Quaternion.identity);
+            enemy.GetComponent<AIMovement>().Init(enemyTarget);
         }
 
         private bool InBounds(int x, int y)
@@ -449,12 +469,37 @@ namespace Code.Generation
             
             return Vector2Int.zero;
         }
-        
+
+        //private void OnDrawGizmos()
+        //{
+        //    Gizmos.color = Color.green;  // Origin location
+        //    Gizmos.DrawSphere(transform.position, 1f);
+        //
+        //    Gizmos.color = Color.yellow;  // Enemy spawn locations
+        //    var pos = transform.position;
+        //    if (_validEnemySpawns != null)
+        //    {
+        //        foreach (var gridPos in _validEnemySpawns) { 
+        //            pos.x = transform.position.x + (gridPos.x * cellSize); 
+        //            pos.y = transform.position.y + 1; 
+        //            pos.z = transform.position.z + (gridPos.y * cellSize); 
+        //            Gizmos.DrawSphere(pos, 0.6f);
+        //        }
+        //    }
+        //
+        //    Gizmos.color = Color.blue;
+        //    var roomPos = FindFarthestRoom();
+        //    pos.x = transform.position.x + (roomPos.x * cellSize);
+        //    pos.y = transform.position.y + 1;
+        //    pos.z = transform.position.z + (roomPos.y * cellSize);
+        //    Gizmos.DrawSphere(pos, 1.2f);
+        //}
+
         private static bool RandBool(float trueWeight)
         {
             return Random.value < trueWeight;
         }
-        
+
         private static Directions RotateDir(Directions dirs)
         {
             var result = Directions.None;
@@ -466,7 +511,7 @@ namespace Code.Generation
 
             return result;
         }
-        
+
         private static bool MeetsRequiredDir(Directions prefabDirections, Directions requiredDirections)
         {
             return (prefabDirections & requiredDirections) == requiredDirections;  // Prefab has at LEAST required dirs
@@ -476,7 +521,8 @@ namespace Code.Generation
         {
             return (prefabDirections & blockedDirections) == Directions.None;  // Prefab matches NONE of blocked dirs
         }
-        
+
+
         private static CookedPrefab GetWeightedRandom(params List<CookedPrefab>[] lists)
         {
             var total = lists.SelectMany(list => list).Sum(p => p.Original.spawnWeight);  // Total weight in list
