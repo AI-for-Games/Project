@@ -325,6 +325,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6548593733480807248, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
   m_PrefabInstance: {fileID: 1249187397}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1013269053 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5126102382628023623, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
+  m_PrefabInstance: {fileID: 1249187397}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d9644ca030c5cd4196a23ba93e96eaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1115094557
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,11 +394,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 4
+  m_FillMethod: 0
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
@@ -453,7 +464,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f762306bcb30c4640998c1e79f819908, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHealth: {fileID: 0}
+  playerHealth: {fileID: 1013269053}
   fillImage: {fileID: 1115094559}
 --- !u!114 &1148262310
 MonoBehaviour:
@@ -507,7 +518,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3533417884356381677, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: speed
-      value: 8
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3612807567437892517, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: target
@@ -629,6 +640,7 @@ MonoBehaviour:
   enemyPrefab: {fileID: 2122198314076755578, guid: d2be288269868544d90deb71c68ef313, type: 3}
   enemySpawnDelay: 3
   enemySpawnRate: 15
+  enemySpawnHeight: 1
   enemyTarget: {fileID: 1013269051}
   voidObject: {fileID: 4339956708527045930, guid: 92df7001b28067841940920dbc4ec102, type: 3}
   voidOffset: -20
@@ -693,7 +705,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   gridSize: {x: 200, y: 200}
-  nodeRadius: 0.5
+  nodeRadius: 0.35
   autoStart: 0
 --- !u!4 &1902913377
 Transform:
