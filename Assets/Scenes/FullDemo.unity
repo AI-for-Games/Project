@@ -628,7 +628,7 @@ MonoBehaviour:
   spawnEnemiesOnEnds: 1
   enemyPrefab: {fileID: 2122198314076755578, guid: d2be288269868544d90deb71c68ef313, type: 3}
   enemySpawnDelay: 3
-  enemySpawnRate: 80
+  enemySpawnRate: 15
   enemyTarget: {fileID: 1013269051}
   voidObject: {fileID: 4339956708527045930, guid: 92df7001b28067841940920dbc4ec102, type: 3}
   voidOffset: -20
