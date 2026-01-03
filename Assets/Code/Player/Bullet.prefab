@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6845201135820545044}
   - component: {fileID: 1428989898882234247}
   - component: {fileID: 5257915425645409422}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34,7 +34,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8869557025505466118
 MeshFilter:

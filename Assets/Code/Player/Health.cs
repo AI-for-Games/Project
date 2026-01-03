@@ -15,7 +15,7 @@ public class Health : MonoBehaviour
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        Debug.Log("Player Health: " + currentHealth);
+        Debug.Log("Entity Health: " + currentHealth);
 
         if (currentHealth <= 0)
             Die();
