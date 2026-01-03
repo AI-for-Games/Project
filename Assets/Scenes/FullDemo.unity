@@ -320,6 +320,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!4 &879192248 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4221594549930439831, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
+  m_PrefabInstance: {fileID: 1249187397}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1013269051 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6548593733480807248, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
@@ -505,6 +510,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 3533417884356381677, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
+      propertyPath: speed
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 3612807567437892517, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: target
       value: 
@@ -618,10 +627,11 @@ MonoBehaviour:
   targetPrefab: {fileID: 0}
   setAgentTarget: 1
   agentTarget: {fileID: 1705192898}
-  spawnEnemiesOnEnds: 0
-  enemySpawnerPrefab: {fileID: 0}
-  enemySpawnRate: 10
-  enemyTarget: {fileID: 0}
+  spawnEnemiesOnEnds: 1
+  enemySpawnerPrefab: {fileID: 8099284786847879531, guid: 39f74f7918c043e4d91850188b0a6621, type: 3}
+  enemyPrefab: {fileID: 2122198314076755578, guid: d2be288269868544d90deb71c68ef313, type: 3}
+  enemySpawnRate: 80
+  enemyTarget: {fileID: 879192248}
   voidObject: {fileID: 4339956708527045930, guid: 92df7001b28067841940920dbc4ec102, type: 3}
   voidOffset: -20
 --- !u!4 &1410463658

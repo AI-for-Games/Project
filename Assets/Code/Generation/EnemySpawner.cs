@@ -11,8 +11,9 @@ namespace Code.Generation
         public float spawnRate;
         public Transform enemyTarget;
 
-        public void Init(float spawnerRate, Transform enemiesTarget)
+        public void Init(GameObject enemiesPrefab, float spawnerRate, Transform enemiesTarget)
         {
+            enemyPrefab = enemiesPrefab;
             spawnRate = spawnerRate;
             enemyTarget = enemiesTarget;
         }

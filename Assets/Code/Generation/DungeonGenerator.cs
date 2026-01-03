@@ -43,6 +43,7 @@ namespace Code.Generation
         [Header("Enemies")]
         public bool spawnEnemiesOnEnds = false;
         public GameObject enemySpawnerPrefab;
+        public GameObject enemyPrefab;
         public float enemySpawnRate = 10;
         public Transform enemyTarget;
 
@@ -96,23 +97,7 @@ namespace Code.Generation
                     agentTarget.transform.position = pos;
                 }
             }
-
-            if (spawnEnemiesOnEnds)  // Enemy spawners spawning
-            {
-                for (var y = 0; y >= gridHeight; y++)
-                {
-                    for (var x = 0; x >= gridWidth; x++)
-                    {
-                        if (IsOccupied(x, y) && _grid[x, y].Original.type == PrefabType.End)
-                        {
-                            var pos = transform.position + new Vector3(x * cellSize, 0, y * cellSize);
-                            var enemySpawner = Instantiate(enemySpawnerPrefab, pos, Quaternion.identity);
-                            enemySpawner.GetComponent<EnemySpawner>().Init(enemySpawnRate, enemyTarget);
-                        }
-                    }
-                }
-            }
-
+            
             SpawnGenerated();
             
             OnDungeonGenerated?.Invoke();  // Trigger finished generation event
@@ -390,6 +375,13 @@ namespace Code.Generation
                     
                     var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);
                     Instantiate(voidObject, pos, Quaternion.identity);
+                    
+                    if (spawnEnemiesOnEnds && IsOccupied(x, y) && _grid[x, y].Original.type == PrefabType.End && _grid[x, y].Original.category == PrefabCategory.Corridor)  // Enemy spawners spawning
+                    {
+                        pos.y = 1;
+                        var enemySpawner = Instantiate(enemySpawnerPrefab, pos, Quaternion.identity);
+                        enemySpawner.GetComponent<EnemySpawner>().Init(enemyPrefab, enemySpawnRate, enemyTarget);
+                    }
                 }
             }
         }
