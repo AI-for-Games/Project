@@ -49,10 +49,10 @@ namespace Code.Generation
         public float enemySpawnHeight = 1;
         public Transform enemyTarget;
 
-        [Header("Void")] 
-        public GameObject voidObject;
+        //[Header("Void")] 
+        //public GameObject voidObject;
 
-        public float voidOffset;
+        //public float voidOffset;
 
         private List<CookedPrefab> _cookedPrefabs;  // Internally used prefabs (includes generated rotations)
         private List<CookedPrefab> _rooms;
@@ -385,8 +385,8 @@ namespace Code.Generation
                 {
                     SpawnCell(x, y);
                     
-                    var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);  // Spawn void below cells
-                    Instantiate(voidObject, pos, Quaternion.identity);
+                    //var pos = transform.position + new Vector3(x * cellSize, voidOffset, y * cellSize);  // Spawn void below cells
+                    //Instantiate(voidObject, pos, Quaternion.identity);
                 }
             }
         }
