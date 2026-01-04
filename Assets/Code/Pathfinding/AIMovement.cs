@@ -8,6 +8,7 @@ public class AIMovement : MonoBehaviour
 
     Pathfinding pathfinding;
     List<GridNode> path;
+    List<GridNode> lastValidPath;
     int pathIndex;
 
     public void Init(Transform movementTarget)
@@ -23,8 +24,18 @@ public class AIMovement : MonoBehaviour
 
     void UpdatePath()
     {
-        path = pathfinding.FindPath(transform.position, target.position);
-        pathIndex = 0;
+        var nodePath = pathfinding.FindPath(transform.position, target.position);
+
+        if (nodePath != null)
+        {
+            path = nodePath;
+            lastValidPath = path;
+            pathIndex = 0;
+        }
+        else if (lastValidPath != null)
+        {
+            path = lastValidPath;
+        }
     }
 
     void Update()

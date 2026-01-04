@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2171,11 +2171,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5126102382628023623, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: maxHealth
-      value: 100
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5126102382628023623, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: currentHealth
-      value: 100
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8517474126015371989, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: speed
@@ -2582,7 +2582,7 @@ MonoBehaviour:
   - {fileID: 5191843416875759565, guid: ef1df827031e1654aaa9a309bac94e3e, type: 3}
   - {fileID: 7028860705964857599, guid: 4079920a0ca7f64488e8c61a317a910f, type: 3}
   spawnTarget: 1
-  targetPrefab: {fileID: 919132149155446097, guid: e72ce65559d2cf54382fda1844f53365, type: 3}
+  targetPrefab: {fileID: 720899666100011154, guid: f6c082a5837670d4dbcca5860e6fafd6, type: 3}
   setAgentTarget: 0
   agentTarget: {fileID: 0}
   spawnEnemiesOnEnds: 1
@@ -3318,6 +3318,7 @@ MonoBehaviour:
   gridSize: {x: 200, y: 200}
   nodeRadius: 0.35
   autoStart: 0
+  nodeDiameter: 0
 --- !u!4 &1902913377
 Transform:
   m_ObjectHideFlags: 0

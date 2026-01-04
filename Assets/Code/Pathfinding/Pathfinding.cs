@@ -19,6 +19,18 @@ public class Pathfinding : MonoBehaviour
         GridNode startNode = grid.NodeFromWorldPoint(startPos);
         GridNode targetNode = grid.NodeFromWorldPoint(targetPos);
 
+        if (!startNode.walkable || !targetNode.walkable)
+            return null;
+
+        foreach (GridNode node in grid.Grid)
+        {
+            node.gCost = int.MaxValue;
+            node.hCost = 0;
+            node.Parent = null;
+        }
+
+        startNode.gCost = 0;
+
         List<GridNode> openSet = new List<GridNode>();
         HashSet<GridNode> closedSet = new HashSet<GridNode>();
         openSet.Add(startNode);
@@ -30,12 +42,13 @@ public class Pathfinding : MonoBehaviour
             for (int i = 1; i < openSet.Count; i++)
             {
                 if (openSet[i].fCost < currentNode.fCost ||
-                    openSet[i].fCost == currentNode.fCost &&
-                    openSet[i].hCost < currentNode.hCost)
+                    (openSet[i].fCost == currentNode.fCost &&
+                     openSet[i].hCost < currentNode.hCost))
                 {
                     currentNode = openSet[i];
                 }
             }
+
             openSet.Remove(currentNode);
             closedSet.Add(currentNode);
 
@@ -46,26 +59,23 @@ public class Pathfinding : MonoBehaviour
 
             foreach (GridNode neighbour in grid.GetNeighbours(currentNode))
             {
-                if(!neighbour.walkable || closedSet.Contains(neighbour))
-                {
+                if (!neighbour.walkable || closedSet.Contains(neighbour))
                     continue;
-                }
-                
+
                 int newCost = currentNode.gCost + GetDistance(currentNode, neighbour);
-                
+
                 if (newCost < neighbour.gCost || !openSet.Contains(neighbour))
                 {
                     neighbour.gCost = newCost;
                     neighbour.hCost = GetDistance(neighbour, targetNode);
                     neighbour.Parent = currentNode;
-                    
+
                     if (!openSet.Contains(neighbour))
-                    {
                         openSet.Add(neighbour);
-                    }
                 }
             }
         }
+
         return null;
     }
 

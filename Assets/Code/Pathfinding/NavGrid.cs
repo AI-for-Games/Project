@@ -13,9 +13,10 @@ public class NavGrid : MonoBehaviour
     public Vector2 gridSize;
     public float nodeRadius = 0.5f;
     public bool autoStart = false;
+    public float nodeDiameter;
     
-    GridNode[,] grid;
-    float nodeDiameter;
+    private GridNode[,] grid;
+    public GridNode[,] Grid => grid;
     int gridSizeX, gridSizeY;
     
     void OnEnable()
