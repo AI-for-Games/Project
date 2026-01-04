@@ -406,7 +406,6 @@ namespace Code.Generation
             pos.x += (spawnPos.x * cellSize);
             pos.y += enemySpawnHeight;  // Offset Y position (otherwise will spawn in ground)
             pos.z += (spawnPos.y * cellSize);
-            //var prefab = _grid[pos.x, pos.y];  // Safe to assume valid (happens after generation)
             var enemy = Instantiate(enemyPrefab, pos, Quaternion.identity);
             enemy.GetComponent<AIMovement>().Init(enemyTarget);
         }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -512,6 +512,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 74054236969516938, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 1196743780496669182, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: m_Height
       value: 2
@@ -578,7 +582,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8722792318459012735, guid: 26ec5dafe8265f74b92f3e4fa8374723, type: 3}
       propertyPath: m_IsTrigger
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -614,11 +618,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c78e5db9fafd944c90df3334d59a7b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridWidth: 10
-  gridHeight: 10
+  gridWidth: 8
+  gridHeight: 8
   cellSize: 20
   roomChance: 0.6
-  requiredRooms: 20
+  requiredRooms: 5
   maxIterations: 100
   maxBranchLength: 200
   prefabs:
@@ -641,7 +645,7 @@ MonoBehaviour:
   - {fileID: 5191843416875759565, guid: ef1df827031e1654aaa9a309bac94e3e, type: 3}
   - {fileID: 7028860705964857599, guid: 4079920a0ca7f64488e8c61a317a910f, type: 3}
   spawnTarget: 1
-  targetPrefab: {fileID: 919132149155446097, guid: e72ce65559d2cf54382fda1844f53365, type: 3}
+  targetPrefab: {fileID: 720899666100011154, guid: f6c082a5837670d4dbcca5860e6fafd6, type: 3}
   setAgentTarget: 0
   agentTarget: {fileID: 0}
   spawnEnemiesOnEnds: 1
@@ -712,7 +716,7 @@ MonoBehaviour:
   unwalkableMask:
     serializedVersion: 2
     m_Bits: 64
-  gridSize: {x: 200, y: 200}
+  gridSize: {x: 160, y: 160}
   nodeRadius: 0.35
   autoStart: 0
 --- !u!4 &1902913377
@@ -723,7 +727,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1902913374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 90, y: 1, z: 90}
+  m_LocalPosition: {x: 70, y: 1, z: 70}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
