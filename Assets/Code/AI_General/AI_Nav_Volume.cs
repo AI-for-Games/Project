@@ -33,7 +33,7 @@ public class AI_Nav_Volume : MonoBehaviour
         transform.position = Vector3.zero;
     }
 
-    void OnValidate()
+    void OnRenderObject()
     {
         DrawWireFrameLocal();
     }
@@ -41,7 +41,12 @@ public class AI_Nav_Volume : MonoBehaviour
     void DrawWireFrameLocal()
     {
         if (m_cube_wire_frame != null)
-            DestroyImmediate(m_cube_wire_frame);
+        {
+            if (Application.isPlaying)
+                Destroy(m_cube_wire_frame);
+            else
+                DestroyImmediate(m_cube_wire_frame);
+        }
 
         m_cube_wire_frame = new GameObject("WireCube");
         m_cube_wire_frame.transform.SetParent(transform);
